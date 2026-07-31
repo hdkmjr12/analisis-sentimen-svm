@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Analisis SVM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="logo-area">
+                <img src="logo.png" alt="Logo"> Analisis SVM
+            </div>
+            <ul class="menu-top">
+                <li class="menu-item"><a href="dashboard.html" class="menu-link active">Dashboard</a></li>
+                <li class="menu-item menu-admin"><a href="impor.html" class="menu-link">Impor Data</a></li>
+                <li class="menu-item menu-admin"><a href="preprocessing.html" class="menu-link">Preprocessing Data</a></li>
+                <li class="menu-item menu-admin"><a href="analisis.html" class="menu-link">Analisis Sentimen</a></li>
+                <li class="menu-item"><a href="uji_sentimen.html" class="menu-link">Uji Sentimen</a></li>
+                <li class="menu-item"><a href="hasil.html" class="menu-link">Hasil Analisis</a></li>
+                <li class="menu-item menu-admin"><a href="cetak_laporan.html" class="menu-link">Cetak Laporan</a></li>
+            </ul>
+        </div>
+        <div>
+            <ul class="menu-bottom">
+                <li class="menu-item" id="menu-beranda-logout"><a href="index.html" class="menu-link">Kembali ke Beranda</a></li>
+                
+            </ul>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="user-profile">
+                <img src="profile.jpeg" id="user-avatar" alt="User Avatar">
+                <div class="user-info">
+                    <span class="user-name" id="user-name">Daud</span>
+                    <span class="user-role" id="user-role">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area" style="position: relative;">
+            
+            <div class="loader-overlay" id="dashboard-loader">
+                <div style="text-align: center; color: var(--primary-blue);">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                    <p style="font-weight: 500;">Memuat Data Database...</p>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <h1 class="page-title">Dashboard Overview</h1>
+                <div class="system-status">
+                    <i class="fa-solid fa-robot" style="color: var(--primary-blue); margin-right: 5px;"></i> Model: <strong>Support Vector Machine</strong>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card fade-up-item delay-1">
+                    <div class="card-info">
+                        <h4>Total Ulasan</h4>
+                        <h2 id="angka-total">0</h2>
+                    </div>
+                    <div class="card-icon icon-total"><i class="fa-solid fa-database"></i></div>
+                </div>
+                
+                <div class="card fade-up-item delay-2">
+                    <div class="card-info">
+                        <h4>Sentimen Positif</h4>
+                        <h2><span id="angka-pos">0</span> <span class="subtitle" id="persen-pos">(0%)</span></h2>
+                    </div>
+                    <div class="card-icon icon-pos"><i class="fa-regular fa-face-smile"></i></div>
+                </div>
+                
+                <div class="card fade-up-item delay-3">
+                    <div class="card-info">
+                        <h4>Sentimen Negatif</h4>
+                        <h2><span id="angka-neg">0</span> <span class="subtitle" id="persen-neg">(0%)</span></h2>
+                    </div>
+                    <div class="card-icon icon-neg"><i class="fa-regular fa-face-frown"></i></div>
+                </div>
+                
+                <div class="card fade-up-item delay-4">
+                    <div class="card-info">
+                        <h4>Sentimen Netral</h4>
+                        <h2><span id="angka-net">0</span> <span class="subtitle" id="persen-net">(0%)</span></h2>
+                    </div>
+                    <div class="card-icon icon-net"><i class="fa-regular fa-face-meh"></i></div>
+                </div>
+            </div>
+
+            
+            <h3 class="preprocess-section-title fade-up-item delay-5">
+                <i class="fa-solid fa-filter"></i> Statistik Preprocessing Data
+            </h3>
+            <div class="preprocess-stats-grid fade-up-item delay-5" id="preprocess-stats-dash">
+                <div class="preprocess-card">
+                    <div class="pc-info">
+                        <h4>Data Sebelum Preprocessing</h4>
+                        <h2 id="d-pc-total-sebelum">-</h2>
+                    </div>
+                    <div class="pc-icon pc-icon-before"><i class="fa-solid fa-database"></i></div>
+                </div>
+                <div class="preprocess-card">
+                    <div class="pc-info">
+                        <h4>Data Sesudah Preprocessing</h4>
+                        <h2 id="d-pc-total-sesudah">-</h2>
+                    </div>
+                    <div class="pc-icon pc-icon-after"><i class="fa-solid fa-clipboard-check"></i></div>
+                </div>
+                <div class="preprocess-card">
+                    <div class="pc-info">
+                        <h4><i class="fa-brands fa-youtube" style="color:#ef4444;margin-right:4px;"></i> YouTube</h4>
+                        <div class="pc-combined">
+                            <span class="pc-val pc-val-before" id="d-pc-yt-before">-</span>
+                            <i class="fa-solid fa-arrow-right pc-arrow"></i>
+                            <span class="pc-val pc-val-after" id="d-pc-yt-after">-</span>
+                        </div>
+                    </div>
+                    <div class="pc-icon pc-icon-yt"><i class="fa-brands fa-youtube"></i></div>
+                </div>
+                <div class="preprocess-card">
+                    <div class="pc-info">
+                        <h4><i class="fa-brands fa-tiktok" style="color:#14b8a6;margin-right:4px;"></i> TikTok</h4>
+                        <div class="pc-combined">
+                            <span class="pc-val pc-val-before" id="d-pc-tt-before">-</span>
+                            <i class="fa-solid fa-arrow-right pc-arrow"></i>
+                            <span class="pc-val pc-val-after" id="d-pc-tt-after">-</span>
+                        </div>
+                    </div>
+                    <div class="pc-icon pc-icon-tt"><i class="fa-brands fa-tiktok"></i></div>
+                </div>
+                <div class="preprocess-card">
+                    <div class="pc-info">
+                        <h4><i class="fa-brands fa-instagram" style="color:#ec4899;margin-right:4px;"></i> Instagram</h4>
+                        <div class="pc-combined">
+                            <span class="pc-val pc-val-before" id="d-pc-ig-before">-</span>
+                            <i class="fa-solid fa-arrow-right pc-arrow"></i>
+                            <span class="pc-val pc-val-after" id="d-pc-ig-after">-</span>
+                        </div>
+                    </div>
+                    <div class="pc-icon pc-icon-ig"><i class="fa-brands fa-instagram"></i></div>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-box fade-up-item delay-5">
+                    <h3 class="chart-title">Perbandingan Volume Sentimen</h3>
+                    <div style="height: 250px; width: 100%; display: flex; justify-content: center;">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-box fade-up-item delay-6">
+                    <h3 class="chart-title">Distribusi Sentimen</h3>
+                    <div style="height: 220px; width: 100%; display: flex; justify-content: center; margin-top: 15px;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="conclusion-box fade-up-item delay-7">
+                <div class="conclusion-text">
+                    <h3>Ringkasan Eksekutif</h3>
+                    <h1 id="teks-kesimpulan">Menunggu data dari database...</h1>
+                </div>
+                <i class="fa-solid fa-car-side" style="font-size: 5rem; color: #e2e8f0;"></i>
+            </div>
+
+            
+            <h2 class="platform-section-title fade-up-item delay-7">
+                <i class="fa-solid fa-chart-pie"></i> Detail per Platform
+            </h2>
+            <div class="platform-grid">
+                
+                <div class="platform-card fade-up-item delay-7" id="card-youtube">
+                    <div class="platform-card-header">
+                        <div class="platform-name">
+                            <div class="platform-icon-box icon-box-yt"><i class="fa-brands fa-youtube"></i></div>
+                            <span>YouTube</span>
+                        </div>
+                        <div class="platform-total" id="total-youtube">0 data</div>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-pos">Positif</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-pos" id="bar-yt-pos"></div></div>
+                        <span class="platform-stat-value" id="val-yt-pos">0 (0%)</span>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-neg">Negatif</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-neg" id="bar-yt-neg"></div></div>
+                        <span class="platform-stat-value" id="val-yt-neg">0 (0%)</span>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-net">Netral</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-net" id="bar-yt-net"></div></div>
+                        <span class="platform-stat-value" id="val-yt-net">0 (0%)</span>
+                    </div>
+                </div>
+
+                
+                <div class="platform-card fade-up-item delay-7" id="card-tiktok">
+                    <div class="platform-card-header">
+                        <div class="platform-name">
+                            <div class="platform-icon-box icon-box-tt"><i class="fa-brands fa-tiktok"></i></div>
+                            <span>TikTok</span>
+                        </div>
+                        <div class="platform-total" id="total-tiktok">0 data</div>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-pos">Positif</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-pos" id="bar-tt-pos"></div></div>
+                        <span class="platform-stat-value" id="val-tt-pos">0 (0%)</span>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-neg">Negatif</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-neg" id="bar-tt-neg"></div></div>
+                        <span class="platform-stat-value" id="val-tt-neg">0 (0%)</span>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-net">Netral</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-net" id="bar-tt-net"></div></div>
+                        <span class="platform-stat-value" id="val-tt-net">0 (0%)</span>
+                    </div>
+                </div>
+
+                
+                <div class="platform-card fade-up-item delay-7" id="card-instagram">
+                    <div class="platform-card-header">
+                        <div class="platform-name">
+                            <div class="platform-icon-box icon-box-ig"><i class="fa-brands fa-instagram"></i></div>
+                            <span>Instagram</span>
+                        </div>
+                        <div class="platform-total" id="total-instagram">0 data</div>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-pos">Positif</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-pos" id="bar-ig-pos"></div></div>
+                        <span class="platform-stat-value" id="val-ig-pos">0 (0%)</span>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-neg">Negatif</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-neg" id="bar-ig-neg"></div></div>
+                        <span class="platform-stat-value" id="val-ig-neg">0 (0%)</span>
+                    </div>
+                    <div class="platform-stat-row">
+                        <span class="platform-stat-label label-net">Netral</span>
+                        <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-net" id="bar-ig-net"></div></div>
+                        <span class="platform-stat-value" id="val-ig-net">0 (0%)</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- 1. FITUR ROLE (HAK AKSES) ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const role = localStorage.getItem('role_akses');
+
+            if (role === 'pengunjung') {
+                const menuAdmin = document.querySelectorAll('.menu-admin');
+                menuAdmin.forEach(menu => {
+                    menu.style.display = 'none';
+                });
+
+                document.getElementById('user-name').innerText = 'Pengunjung';
+                document.getElementById('user-role').innerText = 'Guest';
+                document.getElementById('user-avatar').src = 'https://ui-avatars.com/api/?name=Guest&background=f1f5f9&color=64748b';
+                
+                // Menyembunyikan menu Keluar untuk Pengunjung
+                const menuKeluar = document.getElementById('menu-keluar');
+                if (menuKeluar) {
+                    menuKeluar.style.display = 'none';
+                }
+            } else {
+                const btnLogOut = document.getElementById('btn-login-logout');
+                if (btnLogOut) {
+                    btnLogOut.onclick = function() {
+                        localStorage.removeItem('role_akses');
+                        window.location.href = 'index.html'; // Usir ke Landing Page setelah keluar
+                    }
+                }
+            }
+
+            ambilDataDariDatabase();
+        });
+
+
+        // --- 2. FITUR GRAFIK & DATA ---
+        let barChartInstance = null;
+        let pieChartInstance = null;
+
+        function ambilDataDariDatabase() {
+            fetch('/cgi-bin/tampil.py', { method: 'POST', cache: 'no-store' })
+            .then(response => response.json())
+            .then(result => {
+                
+                // Menghilangkan loader
+                const loader = document.getElementById('dashboard-loader');
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    
+                    // Memicu animasi setelah data siap
+                    const animateItems = document.querySelectorAll('.fade-up-item');
+                    animateItems.forEach(item => {
+                        item.classList.add('animate-now');
+                    });
+                }, 300); 
+
+                if(result.status === 'success') {
+                    const dataReview = result.data.filter(item => item.sentimen && item.sentimen.trim() !== '');
+                    kalkulasiDashboard(dataReview);
+                    
+                    // Populate preprocessing stats
+                    isiWidgetPreprocessingDash(result.statistik_data);
+                } else {
+                    alert('Gagal memuat data: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('dashboard-loader').style.display = 'none';
+                document.getElementById('teks-kesimpulan').innerHTML = "<span style='color:red;'>Gagal terhubung ke database. Pastikan XAMPP/Server menyala.</span>";
+            });
+        }
+
+        // --- FUNGSI ISI WIDGET PREPROCESSING (DASHBOARD) ---
+        function isiWidgetPreprocessingDash(stat) {
+            if (!stat) return;
+            const log = stat.log_preprocessing;
+
+            if (log) {
+                document.getElementById('d-pc-total-sebelum').innerHTML = `${log.total_sebelum.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+                document.getElementById('d-pc-total-sesudah').innerHTML = `${log.total_sesudah.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+
+                const platformMap = [
+                    { keys: ['Youtube', 'youtube'], before: 'd-pc-yt-before', after: 'd-pc-yt-after' },
+                    { keys: ['Tiktok', 'tiktok', 'TikTok'], before: 'd-pc-tt-before', after: 'd-pc-tt-after' },
+                    { keys: ['Instagram', 'instagram'], before: 'd-pc-ig-before', after: 'd-pc-ig-after' }
+                ];
+
+                platformMap.forEach(p => {
+                    let sebelum = 0, sesudah = 0;
+                    p.keys.forEach(k => {
+                        sebelum += (log.per_platform_sebelum[k] || 0);
+                        sesudah += (log.per_platform_sesudah[k] || 0);
+                    });
+                    document.getElementById(p.before).innerText = sebelum;
+                    document.getElementById(p.after).innerText = sesudah;
+                });
+            } else {
+                document.getElementById('d-pc-total-sebelum').innerHTML = `${stat.total_data_db.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+                document.getElementById('d-pc-total-sesudah').innerHTML = `${stat.total_sudah_preprocessing.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+
+                const platformMapFallback = [
+                    { keys: ['Youtube', 'youtube'], before: 'd-pc-yt-before', after: 'd-pc-yt-after' },
+                    { keys: ['Tiktok', 'tiktok', 'TikTok'], before: 'd-pc-tt-before', after: 'd-pc-tt-after' },
+                    { keys: ['Instagram', 'instagram'], before: 'd-pc-ig-before', after: 'd-pc-ig-after' }
+                ];
+                platformMapFallback.forEach(p => {
+                    let db = 0, prep = 0;
+                    p.keys.forEach(k => {
+                        db += (stat.platform_db[k] || 0);
+                        prep += (stat.platform_preprocessed[k] || 0);
+                    });
+                    document.getElementById(p.before).innerText = db;
+                    document.getElementById(p.after).innerText = prep;
+                });
+            }
+        }
+
+        function kalkulasiDashboard(data) {
+            const total = data.length;
+            
+            if (total === 0) {
+                document.getElementById('teks-kesimpulan').innerText = "Belum ada data ulasan yang selesai dianalisis. Silakan impor dan lakukan analisis terlebih dahulu.";
+                return;
+            }
+
+            let pos = 0, neg = 0, net = 0;
+            data.forEach(item => {
+                const s = item.sentimen.toUpperCase();
+                if (s === 'POSITIF') pos++;
+                else if (s === 'NEGATIF') neg++;
+                else if (s === 'NETRAL') net++;
+            });
+
+            const pctPos = Math.round((pos / total) * 100);
+            const pctNeg = Math.round((neg / total) * 100);
+            const pctNet = 100 - pctPos - pctNeg;
+
+            let currentTotal = 0;
+            const targetTotal = total;
+            const timer = setInterval(() => {
+                currentTotal += Math.ceil(targetTotal / 20); 
+                if(currentTotal >= targetTotal) {
+                    currentTotal = targetTotal;
+                    clearInterval(timer);
+                }
+                document.getElementById('angka-total').innerText = currentTotal.toLocaleString('id-ID');
+            }, 30);
+
+            document.getElementById('angka-pos').innerText = pos.toLocaleString('id-ID');
+            document.getElementById('persen-pos').innerText = `(${pctPos}%)`;
+            document.getElementById('angka-neg').innerText = neg.toLocaleString('id-ID');
+            document.getElementById('persen-neg').innerText = `(${pctNeg}%)`;
+            document.getElementById('angka-net').innerText = net.toLocaleString('id-ID');
+            document.getElementById('persen-net').innerText = `(${pctNet}%)`;
+
+            let kesimpulanHtml = "";
+            if (pos > neg && pos > net) {
+                kesimpulanHtml = `Sebagian besar konsumen <span class="highlight-blue">(${pctPos}%)</span> memberikan respons <span class="highlight-blue">POSITIF</span> terhadap mobil LCGC.`;
+            } else if (neg > pos && neg > net) {
+                kesimpulanHtml = `Waspada! Sebagian besar konsumen <span style="color:#ef4444;">(${pctNeg}%)</span> memberikan ulasan <span style="color:#ef4444;">NEGATIF</span> terhadap mobil LCGC.`;
+            } else {
+                kesimpulanHtml = `Tanggapan konsumen terlihat didominasi oleh ulasan yang bersifat <span style="color:#f97316;">NETRAL (${pctNet}%)</span>.`;
+            }
+            document.getElementById('teks-kesimpulan').innerHTML = kesimpulanHtml;
+
+            renderGrafik(pos, neg, net);
+            hitungPerPlatform(data);
+        }
+
+        function renderGrafik(pos, neg, net) {
+            const warnaPos = '#3b82f6'; 
+            const warnaNeg = '#ef4444'; 
+            const warnaNet = '#f97316'; 
+
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            if (barChartInstance) barChartInstance.destroy(); 
+            
+            barChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Positif', 'Negatif', 'Netral'],
+                    datasets: [{
+                        label: 'Jumlah Ulasan',
+                        data: [pos, neg, net],
+                        backgroundColor: [warnaPos, warnaNeg, warnaNet],
+                        borderRadius: 6, 
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } },
+                        x: { grid: { display: false }, border: { display: false } }
+                    }
+                }
+            });
+
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            if (pieChartInstance) pieChartInstance.destroy();
+            
+            pieChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positif', 'Negatif', 'Netral'],
+                    datasets: [{
+                        data: [pos, neg, net],
+                        backgroundColor: [warnaPos, warnaNeg, warnaNet],
+                        hoverOffset: 4,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1500,
+                        easing: 'easeOutBounce'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { usePointStyle: true, padding: 20, font: { family: 'Inter', size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- HITUNG DETAIL PER PLATFORM ---
+        function hitungPerPlatform(data) {
+            const platforms = [
+                { key: 'youtube', prefix: 'yt', label: 'YouTube' },
+                { key: 'tiktok', prefix: 'tt', label: 'TikTok' },
+                { key: 'instagram', prefix: 'ig', label: 'Instagram' }
+            ];
+
+            platforms.forEach(p => {
+                const filtered = data.filter(item => {
+                    const sumber = (item.sumber || '').toLowerCase();
+                    return sumber.includes(p.key);
+                });
+
+                const total = filtered.length;
+                let pos = 0, neg = 0, net = 0;
+                filtered.forEach(item => {
+                    const s = item.sentimen.toUpperCase();
+                    if (s === 'POSITIF') pos++;
+                    else if (s === 'NEGATIF') neg++;
+                    else if (s === 'NETRAL') net++;
+                });
+
+                const pctPos = total ? Math.round((pos / total) * 100) : 0;
+                const pctNeg = total ? Math.round((neg / total) * 100) : 0;
+                const pctNet = total ? (100 - pctPos - pctNeg) : 0;
+
+                document.getElementById(`total-${p.key}`).innerText = `${total} data`;
+                document.getElementById(`val-${p.prefix}-pos`).innerText = `${pos} (${pctPos}%)`;
+                document.getElementById(`val-${p.prefix}-neg`).innerText = `${neg} (${pctNeg}%)`;
+                document.getElementById(`val-${p.prefix}-net`).innerText = `${net} (${pctNet}%)`;
+
+                // Animate bars with delay
+                setTimeout(() => {
+                    document.getElementById(`bar-${p.prefix}-pos`).style.width = pctPos + '%';
+                    document.getElementById(`bar-${p.prefix}-neg`).style.width = pctNeg + '%';
+                    document.getElementById(`bar-${p.prefix}-net`).style.width = pctNet + '%';
+                }, 500);
+            });
+        }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentRole = localStorage.getItem('role_akses');
+            const berandaLogoutItem = document.getElementById('menu-beranda-logout');
+            if (berandaLogoutItem) {
+                const aTag = berandaLogoutItem.querySelector('a');
+                if (currentRole !== 'pengunjung') {
+                    // is admin
+                    if (aTag) {
+                        aTag.innerText = 'Log Out';
+                        aTag.href = '#';
+                        aTag.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm("Yakin ingin log out?")) {
+                                localStorage.removeItem('role_akses');
+                                window.location.href = 'index.html';
+                            }
+                        };
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

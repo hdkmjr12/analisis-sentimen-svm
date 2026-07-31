@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uji Sentimen - Analisis SVM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/uji_sentimen.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="logo-area"><img src="logo.png" alt="Logo"> Analisis SVM</div>
+            <ul class="menu-top">
+                <li class="menu-item"><a href="dashboard.html" class="menu-link">Dashboard</a></li>
+                <li class="menu-item menu-admin"><a href="impor.html" class="menu-link">Impor Data</a></li>
+                <li class="menu-item menu-admin"><a href="preprocessing.html" class="menu-link">Preprocessing Data</a></li>
+                <li class="menu-item menu-admin"><a href="analisis.html" class="menu-link">Analisis Sentimen</a></li>
+                <li class="menu-item"><a href="uji_sentimen.html" class="menu-link active">Uji Sentimen</a></li>
+                <li class="menu-item"><a href="hasil.html" class="menu-link">Hasil Analisis</a></li>
+                <li class="menu-item menu-admin"><a href="cetak_laporan.html" class="menu-link">Cetak Laporan</a></li>
+            </ul>
+        </div>
+        <div>
+            <ul class="menu-bottom">
+                <li class="menu-item" id="menu-beranda-logout"><a href="index.html" class="menu-link">Kembali ke Beranda</a></li>
+                
+            </ul>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="user-profile">
+                <img src="profile.jpeg" id="user-avatar" alt="User Avatar">
+                <div class="user-info">
+                    <span class="user-name" id="user-name">Daud</span>
+                    <span class="user-role" id="user-role">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            
+            <div class="page-header">
+                <h1 class="page-title">Uji Sentimen</h1>
+                <div class="page-subtitle">
+                    <i class="fa-solid fa-flask" style="color: var(--primary-blue); margin-right: 5px;"></i>
+                    Mode: <strong>Prediksi Real-time</strong>
+                </div>
+            </div>
+
+            
+            <div class="uji-layout">
+
+                
+                <div class="input-section fade-up-item delay-1">
+                    <h3 class="section-title">
+                        <i class="fa-solid fa-keyboard"></i> Masukkan Kalimat
+                    </h3>
+                    <p class="section-desc">
+                        Ketik kalimat review konsumen tentang mobil LCGC di bawah ini. Sistem akan memproses dan memprediksi sentimen kalimat menggunakan model SVM.
+                    </p>
+
+                    <textarea class="input-textarea" id="input-kalimat" placeholder="Contoh: Mobilnya sangat nyaman dan irit bensin, cocok untuk keluarga..." maxlength="1000"></textarea>
+                    <div class="char-count"><span id="char-count">0</span> / 1000 karakter</div>
+
+                    <button class="btn-uji" id="btn-uji" onclick="ujikanSentimen()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Uji Sentimen Sekarang
+                    </button>
+
+                    
+                    <div class="contoh-section">
+                        <div class="contoh-title">
+                            <i class="fa-solid fa-lightbulb"></i> Coba contoh kalimat:
+                        </div>
+                        <div class="contoh-chips">
+                            <div class="contoh-chip" onclick="isiContoh('Mobil ini sangat bagus dan nyaman untuk keluarga')">😊 Positif</div>
+                            <div class="contoh-chip" onclick="isiContoh('Mobilnya jelek dan boros bensin, kecewa banget')">😠 Negatif</div>
+                            <div class="contoh-chip" onclick="isiContoh('Mobil LCGC dijual dengan harga 150 juta pada tahun 2024')">😐 Netral</div>
+                            <div class="contoh-chip" onclick="isiContoh('AC kurang dingin dan kabinnya sempit banget')">🥵 Negatif</div>
+                            <div class="contoh-chip" onclick="isiContoh('Alhamdulillah irit banget bensinnya, worth it lah')">🤩 Positif</div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="result-section fade-up-item delay-2" id="result-section">
+                    <h3 class="section-title" style="margin-bottom: 16px;">
+                        <i class="fa-solid fa-chart-simple"></i> Hasil Prediksi
+                    </h3>
+
+                    
+                    <div class="empty-state" id="empty-state">
+                        <i class="fa-solid fa-flask-vial"></i>
+                        <h3>Belum Ada Hasil</h3>
+                        <p>Masukkan kalimat di sebelah kiri dan klik tombol "Uji Sentimen" untuk melihat hasilnya di sini.</p>
+                    </div>
+
+                    
+                    <div class="result-content" id="result-content">
+                        
+                        
+                        <div class="sentimen-badge-area" id="sentimen-badge-area">
+                            <div class="sentimen-icon" id="sentimen-icon"></div>
+                            <div class="sentimen-label" id="sentimen-label"></div>
+                            <div class="sentimen-desc" id="sentimen-desc"></div>
+                        </div>
+
+                        
+                        <div class="skor-container">
+                            <div class="skor-card pos">
+                                <div class="skor-value" id="skor-pos">0</div>
+                                <div class="skor-label">Skor Positif</div>
+                                <div class="skor-detail-list" id="detail-pos"></div>
+                            </div>
+                            <div class="skor-card neg">
+                                <div class="skor-value" id="skor-neg">0</div>
+                                <div class="skor-label">Skor Negatif</div>
+                                <div class="skor-detail-list" id="detail-neg"></div>
+                            </div>
+                        </div>
+
+                        
+                        <div class="detail-box">
+                            <div class="detail-box-title">Hasil Preprocessing</div>
+                            <div class="detail-box-text" id="hasil-preprocessing">-</div>
+                        </div>
+
+                        
+                        <div class="training-info" id="training-info">
+                            <i class="fa-solid fa-database"></i> Model SVM dilatih dengan <strong>0</strong> data ulasan
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            
+            <div class="riwayat-section fade-up-item delay-3">
+                <h3 class="riwayat-title">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Pengujian
+                </h3>
+                <div class="riwayat-list" id="riwayat-list">
+                    <div class="riwayat-empty">Belum ada riwayat pengujian.</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- 1. FITUR ROLE (HAK AKSES) ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const role = localStorage.getItem('role_akses');
+
+            if (role === 'pengunjung') {
+                const menuAdmin = document.querySelectorAll('.menu-admin');
+                menuAdmin.forEach(menu => {
+                    menu.style.display = 'none';
+                });
+
+                document.getElementById('user-name').innerText = 'Pengunjung';
+                document.getElementById('user-role').innerText = 'Guest';
+                document.getElementById('user-avatar').src = 'https://ui-avatars.com/api/?name=Guest&background=f1f5f9&color=64748b';
+            }
+
+            // Pemicu animasi fade-up
+            setTimeout(() => {
+                const animateItems = document.querySelectorAll('.fade-up-item');
+                animateItems.forEach(item => {
+                    item.classList.add('animate-now');
+                });
+            }, 100);
+        });
+
+        // --- 2. CHARACTER COUNT ---
+        const inputKalimat = document.getElementById('input-kalimat');
+        inputKalimat.addEventListener('input', function() {
+            document.getElementById('char-count').innerText = this.value.length;
+        });
+
+        // --- 3. ISI CONTOH KALIMAT ---
+        function isiContoh(teks) {
+            inputKalimat.value = teks;
+            document.getElementById('char-count').innerText = teks.length;
+            inputKalimat.focus();
+        }
+
+        // --- 4. RIWAYAT ---
+        let riwayatPengujian = [];
+
+        function tambahRiwayat(kalimat, sentimen) {
+            riwayatPengujian.unshift({ kalimat, sentimen });
+            if (riwayatPengujian.length > 10) riwayatPengujian.pop(); // Max 10 riwayat
+            renderRiwayat();
+        }
+
+        function renderRiwayat() {
+            const listEl = document.getElementById('riwayat-list');
+            
+            if (riwayatPengujian.length === 0) {
+                listEl.innerHTML = '<div class="riwayat-empty">Belum ada riwayat pengujian.</div>';
+                return;
+            }
+
+            listEl.innerHTML = riwayatPengujian.map(item => {
+                let badgeClass = 'badge-netral';
+                if (item.sentimen === 'POSITIF') badgeClass = 'badge-positif';
+                else if (item.sentimen === 'NEGATIF') badgeClass = 'badge-negatif';
+
+                return `
+                    <div class="riwayat-item">
+                        <span class="riwayat-text">${escapeHtml(item.kalimat)}</span>
+                        <span class="riwayat-badge ${badgeClass}">${item.sentimen}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        // --- 5. KIRIM UJI SENTIMEN ---
+        function ujikanSentimen() {
+            const kalimat = inputKalimat.value.trim();
+            
+            if (!kalimat) {
+                inputKalimat.style.borderColor = '#ef4444';
+                inputKalimat.focus();
+                setTimeout(() => { inputKalimat.style.borderColor = '#e2e8f0'; }, 2000);
+                return;
+            }
+
+            const btn = document.getElementById('btn-uji');
+            const originalHTML = btn.innerHTML;
+            
+            // Loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Menganalisis...';
+            
+            // Hide empty state, show loading
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('result-content').classList.remove('show');
+
+            fetch('/cgi-bin/uji_sentimen.py', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ kalimat: kalimat })
+            })
+            .then(response => response.json())
+            .then(result => {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+
+                if (result.status === 'success') {
+                    tampilkanHasil(result);
+                    tambahRiwayat(result.kalimat_asli, result.sentimen);
+                } else {
+                    alert('Error: ' + result.message);
+                    document.getElementById('empty-state').style.display = 'flex';
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                console.error('Error:', error);
+                alert('Gagal terhubung ke server. Pastikan server CGI menyala.');
+                document.getElementById('empty-state').style.display = 'flex';
+            });
+        }
+
+        // --- 6. TAMPILKAN HASIL ---
+        function tampilkanHasil(data) {
+            const badgeArea = document.getElementById('sentimen-badge-area');
+            const iconEl = document.getElementById('sentimen-icon');
+            const labelEl = document.getElementById('sentimen-label');
+            const descEl = document.getElementById('sentimen-desc');
+
+            // Remove old class
+            badgeArea.classList.remove('positif', 'negatif', 'netral');
+
+            if (data.sentimen === 'POSITIF') {
+                badgeArea.classList.add('positif');
+                iconEl.innerHTML = '<i class="fa-regular fa-face-smile"></i>';
+                labelEl.innerText = 'POSITIF';
+                descEl.innerText = 'Kalimat ini terdeteksi mengandung sentimen positif.';
+            } else if (data.sentimen === 'NEGATIF') {
+                badgeArea.classList.add('negatif');
+                iconEl.innerHTML = '<i class="fa-regular fa-face-frown"></i>';
+                labelEl.innerText = 'NEGATIF';
+                descEl.innerText = 'Kalimat ini terdeteksi mengandung sentimen negatif.';
+            } else {
+                badgeArea.classList.add('netral');
+                iconEl.innerHTML = '<i class="fa-regular fa-face-meh"></i>';
+                labelEl.innerText = 'NETRAL';
+                descEl.innerText = 'Kalimat ini terdeteksi bersifat netral.';
+            }
+
+            // Re-trigger bounce animation
+            iconEl.style.animation = 'none';
+            iconEl.offsetHeight; // Force reflow
+            iconEl.style.animation = '';
+
+            // Skor Lexicon
+            document.getElementById('skor-pos').innerText = data.skor_lexicon.positif;
+            document.getElementById('skor-neg').innerText = data.skor_lexicon.negatif;
+
+            // Detail tags
+            const detailPosEl = document.getElementById('detail-pos');
+            const detailNegEl = document.getElementById('detail-neg');
+            
+            detailPosEl.innerHTML = data.skor_lexicon.detail_positif.length > 0
+                ? data.skor_lexicon.detail_positif.map(d => `<span class="skor-detail-tag pos">${escapeHtml(d)}</span>`).join('')
+                : '<span style="font-size:0.72rem;color:#94a3b8;font-style:italic;">Tidak ada</span>';
+            
+            detailNegEl.innerHTML = data.skor_lexicon.detail_negatif.length > 0
+                ? data.skor_lexicon.detail_negatif.map(d => `<span class="skor-detail-tag neg">${escapeHtml(d)}</span>`).join('')
+                : '<span style="font-size:0.72rem;color:#94a3b8;font-style:italic;">Tidak ada</span>';
+
+            // Hasil Preprocessing
+            document.getElementById('hasil-preprocessing').innerText = data.hasil_preprocessing;
+
+            // Training Info
+            document.getElementById('training-info').innerHTML = `<i class="fa-solid fa-database"></i> Model SVM dilatih dengan <strong>${data.total_data_training.toLocaleString('id-ID')}</strong> data ulasan`;
+
+            // Show result
+            document.getElementById('result-content').classList.add('show');
+        }
+
+        // --- 7. KEYBOARD SHORTCUT ---
+        inputKalimat.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                ujikanSentimen();
+            }
+        });
+    </script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentRole = localStorage.getItem('role_akses');
+            const berandaLogoutItem = document.getElementById('menu-beranda-logout');
+            if (berandaLogoutItem) {
+                const aTag = berandaLogoutItem.querySelector('a');
+                if (currentRole !== 'pengunjung') {
+                    // is admin
+                    if (aTag) {
+                        aTag.innerText = 'Log Out';
+                        aTag.href = '#';
+                        aTag.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm("Yakin ingin log out?")) {
+                                localStorage.removeItem('role_akses');
+                                window.location.href = 'index.html';
+                            }
+                        };
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

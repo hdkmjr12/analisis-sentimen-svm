@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Analisis - Analisis SVM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="css/hasil.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="logo-area"><img src="logo.png" alt="Logo"> Analisis SVM</div>
+            <ul class="menu-top">
+                <li class="menu-item"><a href="dashboard.html" class="menu-link">Dashboard</a></li>
+                <li class="menu-item menu-admin"><a href="impor.html" class="menu-link">Impor Data</a></li>
+                <li class="menu-item menu-admin"><a href="preprocessing.html" class="menu-link">Preprocessing Data</a></li>
+                <li class="menu-item menu-admin"><a href="analisis.html" class="menu-link">Analisis Sentimen</a></li>
+                <li class="menu-item"><a href="uji_sentimen.html" class="menu-link">Uji Sentimen</a></li>
+                <li class="menu-item"><a href="hasil.html" class="menu-link active">Hasil Analisis</a></li>
+                <li class="menu-item menu-admin"><a href="cetak_laporan.html" class="menu-link">Cetak Laporan</a></li>
+            </ul>
+        </div>
+        <div>
+            <ul class="menu-bottom">
+                <li class="menu-item" id="menu-beranda-logout"><a href="index.html" class="menu-link">Kembali ke Beranda</a></li>
+                
+            </ul>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="user-profile">
+                <img src="profile.jpeg" id="user-avatar" alt="User Avatar">
+                <div class="user-info">
+                    <span class="user-name" id="user-name">Daud</span>
+                    <span class="user-role" id="user-role">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area" style="position: relative;">
+            
+            <div class="loader-overlay" id="hasil-loader">
+                <div style="text-align: center; color: var(--primary-blue);">
+                    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                    <p style="font-weight: 500;">Menarik Data Hasil Analisis...</p>
+                </div>
+            </div>
+
+            <div id="area-cetak">
+                
+                <div id="header-pdf" style="display: none; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;">
+                    <h1 style="color: #0f172a; font-size: 1.8rem; margin-bottom: 5px;">Laporan Evaluasi Sentimen SVM</h1>
+                    <p style="color: #64748b; font-size: 0.95rem;">Dicetak pada: <span id="waktu-cetak"></span></p>
+                </div>
+
+                <h1 class="page-title" id="judul-halaman">Hasil Analisis</h1>
+
+                
+                <div class="preprocess-stats-grid fade-up-item h-delay-1" id="preprocess-stats">
+                    <div class="preprocess-card">
+                        <div class="pc-info">
+                            <h4>Data Sebelum Preprocessing</h4>
+                            <h2 id="pc-total-sebelum">-</h2>
+                        </div>
+                        <div class="pc-icon pc-icon-before"><i class="fa-solid fa-database"></i></div>
+                    </div>
+                    <div class="preprocess-card">
+                        <div class="pc-info">
+                            <h4>Data Sesudah Preprocessing</h4>
+                            <h2 id="pc-total-sesudah">-</h2>
+                        </div>
+                        <div class="pc-icon pc-icon-after"><i class="fa-solid fa-clipboard-check"></i></div>
+                    </div>
+                    <div class="preprocess-card">
+                        <div class="pc-info">
+                            <h4><i class="fa-brands fa-youtube" style="color:#ef4444;margin-right:4px;"></i> YouTube</h4>
+                            <div class="pc-combined">
+                                <span class="pc-val pc-val-before" id="pc-yt-before">-</span>
+                                <i class="fa-solid fa-arrow-right pc-arrow"></i>
+                                <span class="pc-val pc-val-after" id="pc-yt-after">-</span>
+                            </div>
+                        </div>
+                        <div class="pc-icon pc-icon-yt"><i class="fa-brands fa-youtube"></i></div>
+                    </div>
+                    <div class="preprocess-card">
+                        <div class="pc-info">
+                            <h4><i class="fa-brands fa-tiktok" style="color:#14b8a6;margin-right:4px;"></i> TikTok</h4>
+                            <div class="pc-combined">
+                                <span class="pc-val pc-val-before" id="pc-tt-before">-</span>
+                                <i class="fa-solid fa-arrow-right pc-arrow"></i>
+                                <span class="pc-val pc-val-after" id="pc-tt-after">-</span>
+                            </div>
+                        </div>
+                        <div class="pc-icon pc-icon-tt"><i class="fa-brands fa-tiktok"></i></div>
+                    </div>
+                    <div class="preprocess-card">
+                        <div class="pc-info">
+                            <h4><i class="fa-brands fa-instagram" style="color:#ec4899;margin-right:4px;"></i> Instagram</h4>
+                            <div class="pc-combined">
+                                <span class="pc-val pc-val-before" id="pc-ig-before">-</span>
+                                <i class="fa-solid fa-arrow-right pc-arrow"></i>
+                                <span class="pc-val pc-val-after" id="pc-ig-after">-</span>
+                            </div>
+                        </div>
+                        <div class="pc-icon pc-icon-ig"><i class="fa-brands fa-instagram"></i></div>
+                    </div>
+                </div>
+                
+                <div class="hasil-layout" id="hasil-layout">
+                    
+                    <div class="table-section">
+                        
+                        <div id="bagian-tabel">
+                            <div class="table-header-controls fade-up-item h-delay-1">
+                                <div class="filter-group">
+                                    <div class="custom-dropdown" id="sentimen-dropdown">
+                                        <div class="dropdown-selected" onclick="toggleSentimenDropdown(event)">
+                                            <span id="sentimen-selected-text">Semua Sentimen</span>
+                                            <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: #94a3b8;"></i>
+                                        </div>
+                                        <div class="dropdown-options" id="sentimen-options">
+                                            <div class="dropdown-option active" onclick="pilihSentimen('SEMUA', 'Semua Sentimen', event)">Semua Sentimen</div>
+                                            <div class="dropdown-option" onclick="pilihSentimen('POSITIF', 'Positif', event)">Positif</div>
+                                            <div class="dropdown-option" onclick="pilihSentimen('NEGATIF', 'Negatif', event)">Negatif</div>
+                                            <div class="dropdown-option" onclick="pilihSentimen('NETRAL', 'Netral', event)">Netral</div>
+                                        </div>
+                                        <input type="hidden" id="select-sentimen" value="SEMUA">
+                                    </div>
+
+                                    <div class="custom-dropdown" id="platform-dropdown">
+                                        <div class="dropdown-selected" onclick="toggleDropdown(event)">
+                                            <span id="platform-selected-text">Semua Platform</span>
+                                            <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: #94a3b8;"></i>
+                                        </div>
+                                        <div class="dropdown-options" id="platform-options">
+                                            <div class="dropdown-option active" onclick="pilihPlatform('SEMUA', 'Semua Platform', event)">Semua Platform</div>
+                                            <div class="dropdown-option" onclick="pilihPlatform('Youtube', 'YouTube', event)">YouTube</div>
+                                            <div class="dropdown-option" onclick="pilihPlatform('Tiktok', 'TikTok', event)">TikTok</div>
+                                            <div class="dropdown-option" onclick="pilihPlatform('Instagram', 'Instagram', event)">Instagram</div>
+                                        </div>
+                                        <input type="hidden" id="select-platform" value="SEMUA">
+                                    </div>
+                                    
+                                    <input type="text" id="input-pencarian" class="search-input" placeholder="Cari kata di ulasan..." oninput="jalankanFilter()">
+                                </div>
+                                <div class="total-data-text" id="teks-total">Ditampilkan : 0 data</div>
+                            </div>
+
+                            <div class="data-table-container fade-up-item h-delay-1">
+                                <div class="table-scroll-wrapper">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="col-no">No</th>
+                                                <th class="col-review-asli">Review Asli</th>
+                                                <th class="col-sumber">Sumber</th>
+                                                <th class="col-tanggal">Tanggal</th>
+                                                <th class="col-hasil">Hasil Preprocessing</th>
+                                                <th class="col-sentimen">Sentimen</th>
+                                                <th class="col-aksi">Bobot</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabel-hasil">
+                                            <tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-gray);">Menyiapkan tabel...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        
+                        <h2 class="platform-section-title fade-up-item h-delay-4" style="margin-top: 24px;">
+                            <i class="fa-solid fa-chart-pie"></i> Detail Sentimen per Platform
+                        </h2>
+                        <div class="platform-grid fade-up-item h-delay-4" id="platform-grid-hasil">
+                            
+                            <div class="platform-card" id="card-yt-hasil">
+                                <div class="platform-card-header">
+                                    <div class="platform-name">
+                                        <div class="platform-icon-box icon-box-yt"><i class="fa-brands fa-youtube"></i></div>
+                                        <span>YouTube</span>
+                                    </div>
+                                    <div class="platform-total" id="total-yt-hasil">0 data</div>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-pos">Positif</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-pos" id="bar-yt-pos-h"></div></div>
+                                    <span class="platform-stat-value" id="val-yt-pos-h">0 (0%)</span>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-neg">Negatif</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-neg" id="bar-yt-neg-h"></div></div>
+                                    <span class="platform-stat-value" id="val-yt-neg-h">0 (0%)</span>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-net">Netral</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-net" id="bar-yt-net-h"></div></div>
+                                    <span class="platform-stat-value" id="val-yt-net-h">0 (0%)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="platform-card" id="card-tt-hasil">
+                                <div class="platform-card-header">
+                                    <div class="platform-name">
+                                        <div class="platform-icon-box icon-box-tt"><i class="fa-brands fa-tiktok"></i></div>
+                                        <span>TikTok</span>
+                                    </div>
+                                    <div class="platform-total" id="total-tt-hasil">0 data</div>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-pos">Positif</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-pos" id="bar-tt-pos-h"></div></div>
+                                    <span class="platform-stat-value" id="val-tt-pos-h">0 (0%)</span>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-neg">Negatif</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-neg" id="bar-tt-neg-h"></div></div>
+                                    <span class="platform-stat-value" id="val-tt-neg-h">0 (0%)</span>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-net">Netral</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-net" id="bar-tt-net-h"></div></div>
+                                    <span class="platform-stat-value" id="val-tt-net-h">0 (0%)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="platform-card" id="card-ig-hasil">
+                                <div class="platform-card-header">
+                                    <div class="platform-name">
+                                        <div class="platform-icon-box icon-box-ig"><i class="fa-brands fa-instagram"></i></div>
+                                        <span>Instagram</span>
+                                    </div>
+                                    <div class="platform-total" id="total-ig-hasil">0 data</div>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-pos">Positif</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-pos" id="bar-ig-pos-h"></div></div>
+                                    <span class="platform-stat-value" id="val-ig-pos-h">0 (0%)</span>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-neg">Negatif</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-neg" id="bar-ig-neg-h"></div></div>
+                                    <span class="platform-stat-value" id="val-ig-neg-h">0 (0%)</span>
+                                </div>
+                                <div class="platform-stat-row">
+                                    <span class="platform-stat-label label-net">Netral</span>
+                                    <div class="platform-stat-bar-bg"><div class="platform-stat-bar bar-net" id="bar-ig-net-h"></div></div>
+                                    <span class="platform-stat-value" id="val-ig-net-h">0 (0%)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fade-up-item h-delay-4" id="widget-evaluasi-svm" style="background-color: #FFFFFF; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-top: 24px; position: relative; min-height: 250px; border: 1px solid #e2e8f0;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="font-size: 1.15rem; font-weight: 600; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-chart-line" style="color: #be185d;"></i> Evaluasi Model SVM
+                                </h3>
+                                <div style="font-size: 0.85rem; color: var(--text-gray); font-weight: 500;">
+                                    <i class="fa-solid fa-vial-circle-check"></i> Data Uji (Testing): 20%
+                                </div>
+                            </div>
+                            
+                            <div id="loading-akurasi" style="color: var(--text-gray); text-align: center; padding: 30px; position: absolute; width: 100%; top: 50%; left: 0; transform: translateY(-50%);">
+                                <i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 15px; color: var(--primary-blue);"></i><br>Mengekstrak Fitur N-Gram & Menghitung Matriks...
+                            </div>
+
+                            <div id="content-akurasi" style="display: none; opacity: 0; transition: opacity 0.5s ease-in;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch;">
+                                    <div style="flex: 1; min-width: 350px;">
+                                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                            <tr>
+                                                <th colspan="2" rowspan="2" style="border: none;"></th>
+                                                <th colspan="3" style="padding: 10px; background: #f8fafc; border: 1px solid #cbd5e1; font-size: 0.8rem; letter-spacing: 1px;">PREDIKSI SVM</th>
+                                            </tr>
+                                            <tr>
+                                                <th style="padding: 10px; border: 1px solid #cbd5e1; color: var(--text-positif); text-align: center;">Positif</th>
+                                                <th style="padding: 10px; border: 1px solid #cbd5e1; color: var(--text-negatif); text-align: center;">Negatif</th>
+                                                <th style="padding: 10px; border: 1px solid #cbd5e1; color: var(--text-netral); text-align: center;">Netral</th>
+                                            </tr>
+                                            <tr>
+                                                <th rowspan="3" style="padding: 10px; background: #f8fafc; border: 1px solid #cbd5e1; text-align: center; font-size: 0.8rem; letter-spacing: 1px; vertical-align: middle; width: 40px;">
+                                                    K<br>U<br>N<br>C<br>I<br><br>A<br>S<br>L<br>I
+                                                </th>
+                                                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left; color: var(--text-positif);">Positif</th>
+                                                <td id="cm-pp" style="padding: 10px; border: 1px solid #cbd5e1; background: #dcfce7; font-weight: bold; text-align: center;">0</td>
+                                                <td id="cm-pn" style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                                <td id="cm-pnt" style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                            </tr>
+                                            <tr>
+                                                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left; color: var(--text-negatif);">Negatif</th>
+                                                <td id="cm-np" style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                                <td id="cm-nn" style="padding: 10px; border: 1px solid #cbd5e1; background: #fee2e2; font-weight: bold; text-align: center;">0</td>
+                                                <td id="cm-nnt" style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                            </tr>
+                                            <tr>
+                                                <th style="padding: 10px; border: 1px solid #cbd5e1; text-align: left; color: var(--text-netral);">Netral</th>
+                                                <td id="cm-ntp" style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                                <td id="cm-ntn" style="padding: 10px; border: 1px solid #cbd5e1; text-align: center;">0</td>
+                                                <td id="cm-ntnt" style="padding: 10px; border: 1px solid #cbd5e1; background: #ffedd5; font-weight: bold; text-align: center;">0</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <div style="flex: 1; min-width: 300px; display: flex; flex-direction: column; justify-content: space-between;">
+                                        <div style="background: #fdf2f8; color: #be185d; padding: 15px 20px; border-radius: 8px; border: 1px solid #fbcfe8; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                            <span style="font-size: 1.1rem; font-weight: 600;">Tingkat Akurasi:</span>
+                                            <span style="font-size: 1.8rem; font-weight: 800;"><span id="angka-akurasi">0</span>%</span>
+                                        </div>
+                                        
+                                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; flex-grow: 1;">
+                                            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-dark); margin-bottom: 12px;"><i class="fa-solid fa-list-check" style="margin-right: 5px;"></i> Laporan Klasifikasi (Macro Avg)</div>
+                                            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                                                <div style="flex: 1; background: #fff; border: 1px solid #e2e8f0; padding: 12px 10px; border-radius: 6px; text-align: center;">
+                                                    <div style="font-size: 0.75rem; color: var(--text-gray); margin-bottom: 4px;">Precision</div>
+                                                    <strong style="font-size: 1.2rem; color: #3b82f6;"><span id="metrik-p">0</span>%</strong>
+                                                </div>
+                                                <div style="flex: 1; background: #fff; border: 1px solid #e2e8f0; padding: 12px 10px; border-radius: 6px; text-align: center;">
+                                                    <div style="font-size: 0.75rem; color: var(--text-gray); margin-bottom: 4px;">Recall</div>
+                                                    <strong style="font-size: 1.2rem; color: #3b82f6;"><span id="metrik-r">0</span>%</strong>
+                                                </div>
+                                                <div style="flex: 1; background: #fff; border: 1px solid #e2e8f0; padding: 12px 10px; border-radius: 6px; text-align: center;">
+                                                    <div style="font-size: 0.75rem; color: var(--text-gray); margin-bottom: 4px;">F1-Score</div>
+                                                    <strong style="font-size: 1.2rem; color: #3b82f6;"><span id="metrik-f1">0</span>%</strong>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-dark); margin-bottom: 12px; margin-top: 16px;"><i class="fa-solid fa-weight-scale" style="margin-right: 5px;"></i> Laporan Klasifikasi (Weighted Avg)</div>
+                                            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                                                <div style="flex: 1; background: #fff; border: 1px solid #e2e8f0; padding: 12px 10px; border-radius: 6px; text-align: center;">
+                                                    <div style="font-size: 0.75rem; color: var(--text-gray); margin-bottom: 4px;">Precision</div>
+                                                    <strong style="font-size: 1.2rem; color: #8b5cf6;"><span id="metrik-wp">0</span>%</strong>
+                                                </div>
+                                                <div style="flex: 1; background: #fff; border: 1px solid #e2e8f0; padding: 12px 10px; border-radius: 6px; text-align: center;">
+                                                    <div style="font-size: 0.75rem; color: var(--text-gray); margin-bottom: 4px;">Recall</div>
+                                                    <strong style="font-size: 1.2rem; color: #8b5cf6;"><span id="metrik-wr">0</span>%</strong>
+                                                </div>
+                                                <div style="flex: 1; background: #fff; border: 1px solid #e2e8f0; padding: 12px 10px; border-radius: 6px; text-align: center;">
+                                                    <div style="font-size: 0.75rem; color: var(--text-gray); margin-bottom: 4px;">F1-Score</div>
+                                                    <strong style="font-size: 1.2rem; color: #8b5cf6;"><span id="metrik-wf1">0</span>%</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-section" id="stats-section">
+                        <div class="stat-box stat-pos fade-up-item h-delay-2">
+                            <div class="title"><span>Positif</span><span id="jml-pos">0 Data</span></div>
+                            <div class="value" id="pct-pos">0%</div>
+                        </div>
+                        
+                        <div class="stat-box stat-neg fade-up-item h-delay-2">
+                            <div class="title"><span>Negatif</span><span id="jml-neg">0 Data</span></div>
+                            <div class="value" id="pct-neg">0%</div>
+                        </div>
+                        
+                        <div class="stat-box stat-net fade-up-item h-delay-2">
+                            <div class="title"><span>Netral</span><span id="jml-net">0 Data</span></div>
+                            <div class="value" id="pct-net">0%</div>
+                        </div>
+
+                        <div class="chart-card fade-up-item h-delay-3">
+                            <h3>Distribusi Sentimen</h3>
+                            <div style="height: 160px; width: 100%; position: relative; display: flex; justify-content: center;">
+                                <canvas id="pieChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card fade-up-item h-delay-3" style="align-items: flex-start; gap: 12px; padding: 15px 20px;">
+                            <h3 style="font-size: 0.95rem; margin-bottom: 0;">Top 5 Kata Terpopuler <br><span style="font-size: 0.75rem; color: var(--text-gray); font-weight: 400;">(Berdasarkan keseluruhan)</span></h3>
+                            <div id="word-cloud" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <span class="word-tag">Memuat...</span>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                </div>
+
+            </div> 
+        </div>
+    </main>
+
+    
+
+    <div class="tfidf-modal" id="modal-tfidf">
+        <div class="tfidf-box">
+            <div class="tfidf-header">
+                <h3 style="margin: 0;">Detail TF-IDF</h3>
+                <button onclick="tutupModalTFIDF()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-gray); margin-bottom: 10px;">
+                Teks: <span id="teks-tfidf-display" style="font-style: italic; color: #333;"></span>
+            </div>
+            <div class="tfidf-body">
+                <table class="tfidf-table">
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th style="text-align: center;">TF</th>
+                            <th style="text-align: center;">TF-IDF (L2)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tfidf-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const role = localStorage.getItem('role_akses');
+            if (role === 'pengunjung') {
+                const menuAdmin = document.querySelectorAll('.menu-admin');
+                menuAdmin.forEach(menu => { menu.style.display = 'none'; });
+                document.getElementById('user-name').innerText = 'Pengunjung';
+                document.getElementById('user-role').innerText = 'Guest';
+                document.getElementById('user-avatar').src = 'https://ui-avatars.com/api/?name=Guest&background=f1f5f9&color=64748b';
+            } 
+            muatDataHasil();
+            muatAkurasi(); 
+        });
+
+        let semuaDataReview = []; 
+        let kategoriAktif = 'SEMUA';
+        let pieChartInstance = null; // Variabel global untuk Chart.js
+
+        function muatDataHasil() {
+            fetch('/cgi-bin/tampil.py', { method: 'POST', cache: 'no-store' })
+            .then(response => response.json())
+            .then(result => {
+                const loaderMaster = document.getElementById('hasil-loader');
+                loaderMaster.style.opacity = '0';
+                setTimeout(() => {
+                    loaderMaster.style.display = 'none';
+                    const animateItems = document.querySelectorAll('.fade-up-item');
+                    animateItems.forEach(item => { item.classList.add('animate-now'); });
+                }, 300);
+
+                if(result.status === 'success') {
+                    semuaDataReview = result.data.filter(item => item.sentimen && item.sentimen.trim() !== '');
+                    
+                    // Populate preprocessing stats
+                    isiWidgetPreprocessing(result.statistik_data);
+                    
+                    setKategori('SEMUA'); 
+                } else {
+                    document.getElementById('tabel-hasil').innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Error: ${result.message}</td></tr>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('tabel-hasil').innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Gagal terhubung ke server.</td></tr>';
+            });
+        }
+
+        // --- FUNGSI ISI WIDGET PREPROCESSING ---
+        function isiWidgetPreprocessing(stat) {
+            if (!stat) return;
+            const log = stat.log_preprocessing;
+
+            // Total sebelum & sesudah
+            if (log) {
+                document.getElementById('pc-total-sebelum').innerHTML = `${log.total_sebelum.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+                document.getElementById('pc-total-sesudah').innerHTML = `${log.total_sesudah.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+
+                // Per platform
+                const platformMap = [
+                    { keys: ['Youtube', 'youtube'], before: 'pc-yt-before', after: 'pc-yt-after' },
+                    { keys: ['Tiktok', 'tiktok', 'TikTok'], before: 'pc-tt-before', after: 'pc-tt-after' },
+                    { keys: ['Instagram', 'instagram'], before: 'pc-ig-before', after: 'pc-ig-after' }
+                ];
+
+                platformMap.forEach(p => {
+                    let sebelum = 0, sesudah = 0;
+                    p.keys.forEach(k => {
+                        sebelum += (log.per_platform_sebelum[k] || 0);
+                        sesudah += (log.per_platform_sesudah[k] || 0);
+                    });
+                    document.getElementById(p.before).innerText = sebelum;
+                    document.getElementById(p.after).innerText = sesudah;
+                });
+            } else {
+                // Fallback: gunakan data current dari DB
+                document.getElementById('pc-total-sebelum').innerHTML = `${stat.total_data_db.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+                document.getElementById('pc-total-sesudah').innerHTML = `${stat.total_sudah_preprocessing.toLocaleString('id-ID')} <span class="pc-sub">data</span>`;
+
+                const platformMapFallback = [
+                    { keys: ['Youtube', 'youtube'], before: 'pc-yt-before', after: 'pc-yt-after' },
+                    { keys: ['Tiktok', 'tiktok', 'TikTok'], before: 'pc-tt-before', after: 'pc-tt-after' },
+                    { keys: ['Instagram', 'instagram'], before: 'pc-ig-before', after: 'pc-ig-after' }
+                ];
+                platformMapFallback.forEach(p => {
+                    let db = 0, prep = 0;
+                    p.keys.forEach(k => {
+                        db += (stat.platform_db[k] || 0);
+                        prep += (stat.platform_preprocessed[k] || 0);
+                    });
+                    document.getElementById(p.before).innerText = db;
+                    document.getElementById(p.after).innerText = prep;
+                });
+            }
+        }
+
+        // --- FUNGSI HITUNG SENTIMEN PER PLATFORM ---
+        function hitungSentimenPerPlatform(data) {
+            const platforms = [
+                { key: 'youtube', prefix: 'yt', label: 'YouTube' },
+                { key: 'tiktok', prefix: 'tt', label: 'TikTok' },
+                { key: 'instagram', prefix: 'ig', label: 'Instagram' }
+            ];
+
+            platforms.forEach(p => {
+                const filtered = data.filter(item => {
+                    const sumber = (item.sumber || '').toLowerCase();
+                    return sumber.includes(p.key);
+                });
+
+                const total = filtered.length;
+                let pos = 0, neg = 0, net = 0;
+                filtered.forEach(item => {
+                    const s = item.sentimen.toUpperCase();
+                    if (s === 'POSITIF') pos++;
+                    else if (s === 'NEGATIF') neg++;
+                    else if (s === 'NETRAL') net++;
+                });
+
+                const pctPos = total ? Math.round((pos / total) * 100) : 0;
+                const pctNeg = total ? Math.round((neg / total) * 100) : 0;
+                const pctNet = total ? (100 - pctPos - pctNeg) : 0;
+
+                document.getElementById(`total-${p.prefix}-hasil`).innerText = `${total} data`;
+                document.getElementById(`val-${p.prefix}-pos-h`).innerText = `${pos} (${pctPos}%)`;
+                document.getElementById(`val-${p.prefix}-neg-h`).innerText = `${neg} (${pctNeg}%)`;
+                document.getElementById(`val-${p.prefix}-net-h`).innerText = `${net} (${pctNet}%)`;
+
+                // Animate bars
+                setTimeout(() => {
+                    document.getElementById(`bar-${p.prefix}-pos-h`).style.width = pctPos + '%';
+                    document.getElementById(`bar-${p.prefix}-neg-h`).style.width = pctNeg + '%';
+                    document.getElementById(`bar-${p.prefix}-net-h`).style.width = pctNet + '%';
+                }, 500);
+            });
+        }
+
+        // Fungsi Dropdown Custom
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('platform-dropdown').querySelector('.dropdown-selected').classList.toggle('open');
+            document.getElementById('platform-options').classList.toggle('show');
+        }
+
+        function pilihPlatform(nilai, teks, e) {
+            e.stopPropagation();
+            document.getElementById('select-platform').value = nilai;
+            document.getElementById('platform-selected-text').innerText = teks;
+            
+            // Tutup dropdown
+            document.getElementById('platform-dropdown').querySelector('.dropdown-selected').classList.remove('open');
+            document.getElementById('platform-options').classList.remove('show');
+            
+            // Update class active
+            const options = document.querySelectorAll('.dropdown-option');
+            options.forEach(opt => opt.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Panggil filter
+            jalankanFilter();
+        }
+
+        // Fungsi Dropdown Sentimen
+        function toggleSentimenDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('sentimen-dropdown').querySelector('.dropdown-selected').classList.toggle('open');
+            document.getElementById('sentimen-options').classList.toggle('show');
+        }
+
+        function pilihSentimen(nilai, teks, e) {
+            e.stopPropagation();
+            kategoriAktif = nilai;
+            document.getElementById('select-sentimen').value = nilai;
+            document.getElementById('sentimen-selected-text').innerText = teks;
+            
+            // Tutup dropdown
+            document.getElementById('sentimen-dropdown').querySelector('.dropdown-selected').classList.remove('open');
+            document.getElementById('sentimen-options').classList.remove('show');
+            
+            // Update class active
+            const options = document.getElementById('sentimen-options').querySelectorAll('.dropdown-option');
+            options.forEach(opt => opt.classList.remove('active'));
+            e.target.classList.add('active');
+
+            // Panggil filter
+            jalankanFilter();
+        }
+
+        // Tutup dropdown jika klik di luar
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('platform-dropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                dropdown.querySelector('.dropdown-selected').classList.remove('open');
+                document.getElementById('platform-options').classList.remove('show');
+            }
+
+            const dropdownSentimen = document.getElementById('sentimen-dropdown');
+            if (dropdownSentimen && !dropdownSentimen.contains(e.target)) {
+                dropdownSentimen.querySelector('.dropdown-selected').classList.remove('open');
+                document.getElementById('sentimen-options').classList.remove('show');
+            }
+        });
+
+        function setKategori(kategori) {
+            kategoriAktif = kategori;
+            document.getElementById('select-sentimen').value = kategori;
+            
+            let teks = 'Semua Sentimen';
+            if (kategori === 'POSITIF') teks = 'Positif';
+            if (kategori === 'NEGATIF') teks = 'Negatif';
+            if (kategori === 'NETRAL') teks = 'Netral';
+            document.getElementById('sentimen-selected-text').innerText = teks;
+            
+            const options = document.getElementById('sentimen-options').querySelectorAll('.dropdown-option');
+            options.forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.innerText === teks) opt.classList.add('active');
+            });
+
+            jalankanFilter();
+        }
+
+        function jalankanFilter() {
+            let kataKunci = document.getElementById('input-pencarian').value.toLowerCase();
+            let platformAktif = document.getElementById('select-platform').value;
+            let dataTersaring = semuaDataReview;
+
+            // Filter berdasarkan platform terlebih dahulu
+            if (platformAktif !== 'SEMUA') {
+                dataTersaring = dataTersaring.filter(item => {
+                    const sumber = (item.sumber || '').toLowerCase();
+                    return sumber === platformAktif.toLowerCase();
+                });
+            }
+
+            // Hitung statistik berdasarkan data yang sudah difilter platform
+            hitungStatistik(dataTersaring);
+
+            // Hitung sentimen per platform (selalu gunakan semua data)
+            hitungSentimenPerPlatform(semuaDataReview);
+
+            // Lalu filter berdasarkan sentimen
+            if (kategoriAktif !== 'SEMUA') {
+                dataTersaring = dataTersaring.filter(item => item.sentimen.toUpperCase() === kategoriAktif);
+            }
+
+            // Lalu filter berdasarkan kata kunci pencarian
+            if (kataKunci.trim() !== '') {
+                dataTersaring = dataTersaring.filter(item => 
+                    (item.teks && item.teks.toLowerCase().includes(kataKunci)) || 
+                    (item.hasil && item.hasil.toLowerCase().includes(kataKunci))
+                );
+            }
+
+            renderTabelHasil(dataTersaring);
+            hitungTopKata(dataTersaring); 
+        }
+
+        // Fungsi untuk membuat badge sumber
+        function buatBadgeSumber(sumber) {
+            if (!sumber || sumber === '-') return '<span class="badge-sumber badge-lainnya">-</span>';
+            const s = sumber.toLowerCase();
+            let badgeClass = 'badge-lainnya';
+            if (s.includes('instagram')) badgeClass = 'badge-instagram';
+            else if (s.includes('tiktok')) badgeClass = 'badge-tiktok';
+            else if (s.includes('youtube')) badgeClass = 'badge-youtube';
+            return `<span class="badge-sumber ${badgeClass}">${sumber}</span>`;
+        }
+
+        function renderTabelHasil(data) {
+            const tbody = document.getElementById('tabel-hasil');
+            document.getElementById('teks-total').innerText = `Ditampilkan : ${data.length} data`;
+            
+            // Trigger animasi re-render
+            tbody.classList.remove('animate-table');
+            void tbody.offsetWidth; // Force reflow
+            tbody.classList.add('animate-table');
+
+            tbody.innerHTML = ''; 
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-gray);">Pencarian tidak ditemukan / Kosong.</td></tr>';
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const teksAsli = item.teks ? item.teks : '-';
+                const hasilTeks = item.hasil && item.hasil.trim() !== '' ? item.hasil : '<i style="color:#ccc;">Kosong</i>';
+                
+                let labelSentimen = '';
+                if (item.sentimen.toUpperCase() === 'POSITIF') labelSentimen = '<span class="text-positif">POSITIF</span>';
+                else if (item.sentimen.toUpperCase() === 'NEGATIF') labelSentimen = '<span class="text-negatif">NEGATIF</span>';
+                else labelSentimen = '<span class="text-netral">NETRAL</span>'; 
+
+                // Menambahkan tombol aksi ke dalam baris tabel
+                const row = `<tr>
+                                <td class="col-no">${index + 1}.</td>
+                                <td class="col-review-asli">${teksAsli}</td>
+                                <td class="col-sumber">${buatBadgeSumber(item.sumber)}</td>
+                                <td class="col-tanggal">${item.tanggal}</td>
+                                <td class="col-hasil">${hasilTeks}</td>
+                                <td class="col-sentimen">${labelSentimen}</td>
+                                <td class="col-aksi">
+                                    <button class="btn-mata" onclick="bukaModalTFIDF(${item.id})"><i class="fa-solid fa-eye"></i></button>
+                                </td>
+                             </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function amankanHTML(nilai) {
+            return String(nilai)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // FUNGSI UNTUK MEMBUKA DAN MENUTUP MODAL TF-IDF
+        async function bukaModalTFIDF(idReview) {
+            const tbody = document.getElementById('tfidf-tbody');
+            const review = semuaDataReview.find(item => Number(item.id) === Number(idReview));
+            document.getElementById('teks-tfidf-display').innerText = review ? review.hasil : '';
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Menghitung TF-IDF...</td></tr>';
+            document.getElementById('modal-tfidf').classList.add('active');
+
+            try {
+                const response = await fetch(`/cgi-bin/detail_tfidf.py?id=${encodeURIComponent(idReview)}`, {
+                    method: 'GET',
+                    cache: 'no-store'
+                });
+                const result = await response.json();
+                if (result.status !== 'success') throw new Error(result.message || 'Detail TF-IDF tidak tersedia.');
+
+                document.getElementById('teks-tfidf-display').innerText = result.teks;
+                if (!result.data || result.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada term yang masuk vocabulary model.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = result.data.map(item => `
+                    <tr>
+                        <td style="font-weight: 500;">${amankanHTML(item.term)}</td>
+                        <td style="text-align: center;">${item.tf}</td>
+                        <td style="text-align: center;"><span class="badge-tfidf">${Number(item.tfidf).toFixed(4)}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#dc2626;">${amankanHTML(error.message)}</td></tr>`;
+            }
+        }
+
+        function tutupModalTFIDF() {
+            document.getElementById('modal-tfidf').classList.remove('active');
+        }
+
+        function hitungTopKata(data) {
+            let frekuensiKata = {};
+            let kataAbaikan = ['yang', 'di', 'dan', 'itu', 'ini', 'untuk', 'dari', 'ke', 'dengan', 'ada', 'karena', 'bisa', 'kalau', 'tidak', 'mobil', 'lcgc', 'apa', 'jadi', 'mau', 'sama', 'buat', 'juga', 'aja', 'sudah', 'baru', 'beli', 'harga', 'punya', 'pakai'];
+            
+            data.forEach(item => {
+                if(item.hasil) {
+                    let kataKata = item.hasil.toLowerCase().split(' ');
+                    kataKata.forEach(k => {
+                        if(k.length > 2 && !kataAbaikan.includes(k)) {
+                            frekuensiKata[k] = (frekuensiKata[k] || 0) + 1;
+                        }
+                    });
+                }
+            });
+            
+            let kataTerurut = Object.keys(frekuensiKata).sort((a,b) => frekuensiKata[b] - frekuensiKata[a]).slice(0, 5);
+            let htmlHTML = '';
+            kataTerurut.forEach(k => {
+                htmlHTML += `<span class="word-tag">${k}<span>${frekuensiKata[k]}x</span></span>`;
+            });
+            
+            if(htmlHTML === '') htmlHTML = '<span style="font-size:0.8rem; color:#94a3b8;">Belum ada kata dominan</span>';
+            document.getElementById('word-cloud').innerHTML = htmlHTML;
+        }
+
+        function hitungStatistik(data) {
+            const total = data.length;
+            if (total === 0) return;
+
+            let jmlPos = 0, jmlNeg = 0, jmlNet = 0;
+            data.forEach(item => {
+                const s = item.sentimen.toUpperCase();
+                if (s === 'POSITIF') jmlPos++;
+                else if (s === 'NEGATIF') jmlNeg++;
+                else if (s === 'NETRAL') jmlNet++;
+            });
+
+            const pctPos = Math.round((jmlPos / total) * 100);
+            const pctNeg = Math.round((jmlNeg / total) * 100);
+            const pctNet = 100 - pctPos - pctNeg;
+
+            document.getElementById('jml-pos').innerText = `${jmlPos} Data`; 
+            document.getElementById('jml-neg').innerText = `${jmlNeg} Data`; 
+            document.getElementById('jml-net').innerText = `${jmlNet} Data`; 
+
+            document.getElementById('pct-pos').innerText = pctPos + '%';
+            document.getElementById('pct-neg').innerText = pctNeg + '%';
+            document.getElementById('pct-net').innerText = pctNet + '%';
+
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            if (pieChartInstance) pieChartInstance.destroy();
+            
+            pieChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positif', 'Negatif', 'Netral'],
+                    datasets: [{
+                        data: [jmlPos, jmlNeg, jmlNet],
+                        backgroundColor: ['#0ea5e9', '#ef4444', '#f97316'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { display: false } 
+                    },
+                    animation: { duration: 0 } 
+                }
+            });
+        }
+
+        function muatAkurasi() {
+            document.getElementById('content-akurasi').style.display = 'none';
+            document.getElementById('loading-akurasi').style.display = 'block';
+
+            fetch('/cgi-bin/get_akurasi.py', { method: 'POST', cache: 'no-store' })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById('loading-akurasi').style.display = 'none';
+                
+                if (result.status === 'success') {
+                    const contentAkurasi = document.getElementById('content-akurasi');
+                    contentAkurasi.style.display = 'block';
+                    
+                    setTimeout(() => { contentAkurasi.style.opacity = '1'; }, 50);
+
+                    document.getElementById('angka-akurasi').innerText = result.akurasi;
+                    
+                    document.getElementById('cm-pp').innerText = result.cm.pos_pos;
+                    document.getElementById('cm-pn').innerText = result.cm.pos_neg;
+                    document.getElementById('cm-pnt').innerText = result.cm.pos_net;
+                    document.getElementById('cm-np').innerText = result.cm.neg_pos;
+                    document.getElementById('cm-nn').innerText = result.cm.neg_neg;
+                    document.getElementById('cm-nnt').innerText = result.cm.neg_net;
+                    document.getElementById('cm-ntp').innerText = result.cm.net_pos;
+                    document.getElementById('cm-ntn').innerText = result.cm.net_neg;
+                    document.getElementById('cm-ntnt').innerText = result.cm.net_net;
+
+                    const pembagianAman = (num, den) => den === 0 ? 0 : num / den;
+
+                    let p_pos = pembagianAman(result.cm.pos_pos, (result.cm.pos_pos + result.cm.neg_pos + result.cm.net_pos));
+                    let r_pos = pembagianAman(result.cm.pos_pos, (result.cm.pos_pos + result.cm.pos_neg + result.cm.pos_net));
+                    let f1_pos = pembagianAman((2 * p_pos * r_pos), (p_pos + r_pos));
+
+                    let p_neg = pembagianAman(result.cm.neg_neg, (result.cm.neg_neg + result.cm.pos_neg + result.cm.net_neg));
+                    let r_neg = pembagianAman(result.cm.neg_neg, (result.cm.neg_neg + result.cm.neg_pos + result.cm.neg_net));
+                    let f1_neg = pembagianAman((2 * p_neg * r_neg), (p_neg + r_neg));
+
+                    let p_net = pembagianAman(result.cm.net_net, (result.cm.net_net + result.cm.pos_net + result.cm.neg_net));
+                    let r_net = pembagianAman(result.cm.net_net, (result.cm.net_net + result.cm.net_pos + result.cm.net_neg));
+                    let f1_net = pembagianAman((2 * p_net * r_net), (p_net + r_net));
+
+                    let macro_p = (p_pos + p_neg + p_net) / 3;
+                    let macro_r = (r_pos + r_neg + r_net) / 3;
+                    let macro_f1 = (f1_pos + f1_neg + f1_net) / 3;
+
+                    document.getElementById('metrik-p').innerText = Math.round(macro_p * 100);
+                    document.getElementById('metrik-r').innerText = Math.round(macro_r * 100);
+                    document.getElementById('metrik-f1').innerText = Math.round(macro_f1 * 100);
+
+                    // Weighted Average
+                    let support_pos = result.cm.pos_pos + result.cm.pos_neg + result.cm.pos_net;
+                    let support_neg = result.cm.neg_pos + result.cm.neg_neg + result.cm.neg_net;
+                    let support_net = result.cm.net_pos + result.cm.net_neg + result.cm.net_net;
+                    let total_support = support_pos + support_neg + support_net;
+
+                    let weighted_p = total_support === 0 ? 0 : (p_pos * support_pos + p_neg * support_neg + p_net * support_net) / total_support;
+                    let weighted_r = total_support === 0 ? 0 : (r_pos * support_pos + r_neg * support_neg + r_net * support_net) / total_support;
+                    let weighted_f1 = total_support === 0 ? 0 : (f1_pos * support_pos + f1_neg * support_neg + f1_net * support_net) / total_support;
+
+                    document.getElementById('metrik-wp').innerText = Math.round(weighted_p * 100);
+                    document.getElementById('metrik-wr').innerText = Math.round(weighted_r * 100);
+                    document.getElementById('metrik-wf1').innerText = Math.round(weighted_f1 * 100);
+
+                } else if (result.status === 'pending') {
+                    document.getElementById('loading-akurasi').style.display = 'block';
+                    document.getElementById('loading-akurasi').innerHTML = `<i class="fa-solid fa-clock" style="color: #4f83f1; font-size: 2rem; margin-bottom: 10px;"></i><br><span style="color: var(--text-gray);">${result.message}</span>`;
+                } else {
+                    document.getElementById('loading-akurasi').style.display = 'block';
+                    document.getElementById('loading-akurasi').innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: red; font-size: 2rem; margin-bottom: 10px;"></i><br><span style="color:red;">Error Python: ${result.message}</span>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading-akurasi').style.display = 'block';
+                document.getElementById('loading-akurasi').innerHTML = `<i class="fa-solid fa-wifi" style="color: red; font-size: 2rem; margin-bottom: 10px;"></i><br><span style="color:red;">Gagal terhubung ke server/database!</span>`;
+            });
+        }
+
+         
+        // --- 4. EKSPOR LAPORAN PDF ---
+
+        function bukaModalEkspor() {
+            document.getElementById('modal-ekspor').classList.add('active');
+        }
+
+        function tutupModalEkspor() {
+            document.getElementById('modal-ekspor').classList.remove('active');
+        }
+
+        function eksporPDF(tipe) {
+            tutupModalEkspor();
+            
+            const btn = document.getElementById('btn-ekspor');
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = '<span>Menyusun PDF...</span><i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.style.opacity = '0.8';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const areaCetak = document.getElementById('area-cetak');
+                const headerPDF = document.getElementById('header-pdf');
+                const judulHalaman = document.getElementById('judul-halaman');
+                const bagianTabel = document.getElementById('bagian-tabel');
+                const hasilLayout = document.getElementById('hasil-layout');
+                const statsSection = document.getElementById('stats-section');
+                
+                const statBoxes = document.querySelectorAll('.stat-box');
+                const chartCards = document.querySelectorAll('.chart-card');
+                const evaluasiCard = document.getElementById('widget-evaluasi-svm'); // Evaluasi SVM
+                const preprocessStats = document.getElementById('preprocess-stats');
+                const platformGrid = document.getElementById('platform-grid-hasil');
+                const platformTitle = document.querySelector('.platform-section-title');
+
+                // Sembunyikan elemen utama web
+                bagianTabel.style.display = 'none';
+                judulHalaman.style.display = 'none';
+                btn.style.display = 'none';
+                
+                // Atur visibilitas berdasarkan TIPE ekspor
+                if (tipe === 'preprocessing') {
+                    if(statsSection) statsSection.style.display = 'none';
+                    if(evaluasiCard) evaluasiCard.style.display = 'none'; // Sembunyikan SVM
+                    if(platformGrid) platformGrid.style.display = 'none';
+                    if(platformTitle) platformTitle.style.display = 'none';
+                    if(preprocessStats) preprocessStats.style.display = 'grid';
+                } else if (tipe === 'sentimen') {
+                    if(preprocessStats) preprocessStats.style.display = 'none';
+                    if(statsSection) statsSection.style.display = 'flex';
+                    if(evaluasiCard) evaluasiCard.style.display = 'none'; // Sembunyikan SVM sesuai permintaan
+                    if(platformGrid) platformGrid.style.display = 'grid';
+                    if(platformTitle) platformTitle.style.display = 'flex';
+                } else {
+                    // semua
+                    if(statsSection) statsSection.style.display = 'flex';
+                    if(evaluasiCard) evaluasiCard.style.display = 'block'; // Tampilkan SVM
+                    if(platformGrid) platformGrid.style.display = 'grid';
+                    if(platformTitle) platformTitle.style.display = 'flex';
+                    if(preprocessStats) preprocessStats.style.display = 'grid';
+                }
+
+                // Tanggal
+                const waktuSekarang = new Date();
+                const opsiTanggal = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                document.getElementById('waktu-cetak').innerText = waktuSekarang.toLocaleDateString('id-ID', opsiTanggal) + ' WIB';
+                headerPDF.style.display = 'block';
+
+                // =========================
+                // BUAT TABEL 50 DATA SAMPEL (Mewakili Semua Platform)
+                // =========================
+                let ytData = semuaDataReview.filter(d => d.sumber.toLowerCase() === 'youtube');
+                let ttData = semuaDataReview.filter(d => d.sumber.toLowerCase() === 'tiktok');
+                let igData = semuaDataReview.filter(d => d.sumber.toLowerCase() === 'instagram');
+                let lainnyaData = semuaDataReview.filter(d => !['youtube', 'tiktok', 'instagram'].includes(d.sumber.toLowerCase()));
+                
+                let sampelData = [];
+                let iY = 0, iT = 0, iI = 0, iL = 0;
+                
+                // Ambil round-robin agar proporsional dari setiap platform
+                while(sampelData.length < 50 && (iY < ytData.length || iT < ttData.length || iI < igData.length || iL < lainnyaData.length)) {
+                    if(iY < ytData.length && sampelData.length < 50) sampelData.push(ytData[iY++]);
+                    if(iT < ttData.length && sampelData.length < 50) sampelData.push(ttData[iT++]);
+                    if(iI < igData.length && sampelData.length < 50) sampelData.push(igData[iI++]);
+                    if(iL < lainnyaData.length && sampelData.length < 50) sampelData.push(lainnyaData[iL++]);
+                }
+
+                let htmlTabelSampel = `<div id="tabel-sampel-pdf" style="margin-top: 25px; width: 100%;">
+                    <h3 style="font-size: 14px; margin-bottom: 10px; color: #333; text-align: left;">Sampel 50 Data Teratas (Mewakili Setiap Platform)</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; text-align: left;">
+                        <thead>
+                            <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">`;
+                
+                if (tipe === 'preprocessing') {
+                    htmlTabelSampel += `<th style="padding: 6px; border: 1px solid #e2e8f0;">No</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Review Asli</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Sumber</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Hasil Preprocessing</th>`;
+                } else if (tipe === 'sentimen') {
+                    htmlTabelSampel += `<th style="padding: 6px; border: 1px solid #e2e8f0;">No</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Hasil Preprocessing</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Sentimen</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Sumber</th>`;
+                } else {
+                    htmlTabelSampel += `<th style="padding: 6px; border: 1px solid #e2e8f0;">No</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Review Asli</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Sumber</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Hasil Preprocessing</th>
+                                        <th style="padding: 6px; border: 1px solid #e2e8f0;">Sentimen</th>`;
+                }
+                htmlTabelSampel += `</tr></thead><tbody>`;
+
+                for (let i = 0; i < sampelData.length; i++) {
+                    let item = sampelData[i];
+                    htmlTabelSampel += `<tr>`;
+                    if (tipe === 'preprocessing') {
+                        htmlTabelSampel += `<td style="padding: 6px; border: 1px solid #e2e8f0;">${i+1}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0;">${item.teks}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0; text-transform: capitalize;">${item.sumber}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0;">${item.hasil}</td>`;
+                    } else if (tipe === 'sentimen') {
+                        htmlTabelSampel += `<td style="padding: 6px; border: 1px solid #e2e8f0;">${i+1}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0;">${item.hasil}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0;"><b>${item.sentimen}</b></td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0; text-transform: capitalize;">${item.sumber}</td>`;
+                    } else {
+                        htmlTabelSampel += `<td style="padding: 6px; border: 1px solid #e2e8f0;">${i+1}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0;">${item.teks}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0; text-transform: capitalize;">${item.sumber}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0;">${item.hasil}</td>
+                                            <td style="padding: 6px; border: 1px solid #e2e8f0;"><b>${item.sentimen}</b></td>`;
+                    }
+                    htmlTabelSampel += `</tr>`;
+                }
+                htmlTabelSampel += `</tbody></table></div>`;
+
+                // =========================
+                // PERBAIKAN AGAR MUAT
+                // =========================
+                hasilLayout.style.display = 'flex';
+                hasilLayout.style.flexDirection = 'column';
+                hasilLayout.style.gap = '18px';
+                
+                if (tipe !== 'preprocessing') {
+                    hasilLayout.insertBefore(statsSection, hasilLayout.firstChild);
+                    statsSection.style.display = 'flex';
+                    statsSection.style.flexDirection = 'row';
+                    statsSection.style.flexWrap = 'wrap';
+                    statsSection.style.gap = '12px';
+                    statsSection.style.marginTop = '0';
+
+                    statBoxes.forEach(box => {
+                        box.style.flex = '1';
+                        box.style.minWidth = '30%';
+                        box.style.minHeight = '90px'; 
+                        box.style.padding = '14px 18px';
+                        box.style.border = '1px solid #e2e8f0';
+                        box.style.boxShadow = 'none';
+                        box.querySelector('.title').style.fontSize = '0.9rem';
+                        box.querySelector('.value').style.fontSize = '1.6rem';
+                    });
+
+                    chartCards.forEach(card => {
+                        card.style.flex = '1';
+                        card.style.minWidth = '45%';
+                        card.style.minHeight = '200px'; 
+                        card.style.padding = '16px';
+                        card.style.boxShadow = 'none';
+                    });
+                    
+                    const pieWrapper = document.querySelector('#pieChart').parentElement;
+                    
+                    if(evaluasiCard) {
+                        evaluasiCard.style.padding = '18px';
+                        evaluasiCard.style.marginTop = '0';
+                    }
+                }
+
+                areaCetak.style.background = '#FFFFFF';
+                areaCetak.style.padding = '22px'; 
+                areaCetak.style.borderRadius = '0';
+                
+                // Tambahkan tabel sampel ke dalam area cetak
+                areaCetak.insertAdjacentHTML('beforeend', htmlTabelSampel);
+
+                // Kecilkan sedikit seluruh isi 
+                areaCetak.style.transform = 'scale(0.94)';
+                areaCetak.style.transformOrigin = 'top center';
+
+                // anti animasi
+                const styleCetak = document.createElement('style');
+                styleCetak.id = 'style-cetak-pdf';
+                styleCetak.innerHTML = `
+                    #area-cetak *{
+                        animation:none !important;
+                        transition:none !important;
+                        transform:none !important;
+                        opacity:1 !important;
+                    }
+                    .chart-card h3{
+                        font-size:15px !important;
+                        margin-bottom:8px !important;
+                    }
+                    .word-tag{
+                        font-size:11px !important;
+                        padding:5px 10px !important;
+                    }
+                    table{
+                        font-size:11px !important;
+                    }
+                    
+                    .preprocess-card, .stat-box, .chart-card, .platform-card, #widget-evaluasi-svm, tr {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
+                `;
+                document.head.appendChild(styleCetak);
+
+                let namaFile = 'Laporan_Eksekutif_Keseluruhan.pdf';
+                if (tipe === 'preprocessing') namaFile = 'Laporan_Eksekutif_Preprocessing.pdf';
+                if (tipe === 'sentimen') namaFile = 'Laporan_Eksekutif_Analisis_Sentimen.pdf';
+
+                const opt = {
+                    margin: [5, 5, 5, 5], 
+                    filename: namaFile,
+                    image: { type: 'jpeg', quality: 1.0 },
+                    html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                html2pdf().set(opt).from(areaCetak).save().then(() => {
+                    // RESTORE SEMUA
+                    document.head.removeChild(styleCetak);
+                    const elTabelSampel = document.getElementById('tabel-sampel-pdf');
+                    if(elTabelSampel) elTabelSampel.remove();
+
+                    headerPDF.style.display = 'none';
+                    judulHalaman.style.display = 'block';
+                    bagianTabel.style.display = 'block';
+                    btn.style.display = 'flex';
+                   
+                    if(preprocessStats) preprocessStats.style.display = 'grid';
+                    if(statsSection) {
+                        statsSection.style.display = '';
+                        statsSection.style.flexDirection = '';
+                        statsSection.style.flexWrap = '';
+                        statsSection.style.gap = '';
+                        statsSection.style.marginTop = '';
+                        hasilLayout.appendChild(statsSection);
+                    }
+                    if(evaluasiCard) evaluasiCard.style.display = 'block';
+                    if(platformGrid) platformGrid.style.display = 'grid';
+                    if(platformTitle) platformTitle.style.display = 'flex';
+                    
+                    hasilLayout.style.display = '';
+                    hasilLayout.style.flexDirection = '';
+                    hasilLayout.style.gap = '';
+
+                    statBoxes.forEach(box => {
+                        box.style.flex = '';
+                        box.style.minWidth = '';
+                        box.style.minHeight = '';
+                        box.style.padding = '';
+                        box.style.border = '';
+                        box.style.boxShadow = '';
+                        box.querySelector('.title').style.fontSize = '';
+                        box.querySelector('.value').style.fontSize = '';
+                    });
+
+                    chartCards.forEach(card => {
+                        card.style.flex = '';
+                        card.style.minWidth = '';
+                        card.style.minHeight = '';
+                        card.style.padding = '';
+                        card.style.boxShadow = '';
+                    });
+
+                    if(evaluasiCard) {
+                        evaluasiCard.style.padding = '';
+                        evaluasiCard.style.marginTop = '';
+                    }
+
+                    areaCetak.style.background = '';
+                    areaCetak.style.padding = '';
+                    areaCetak.style.transform = '';
+                    areaCetak.style.transformOrigin = '';
+
+                    btn.innerHTML = originalHTML;
+                    btn.style.opacity = '1';
+                    btn.disabled = false;
+                });
+            }, 100);
+        }
+        function eksporCSV() {
+            tutupModalEkspor();
+            if (semuaDataReview.length === 0) {
+                alert("Tidak ada data untuk diekspor!");
+                return;
+            }
+
+            const headers = ['No', 'Review Asli', 'Sumber', 'Hasil Preprocessing', 'Sentimen'];
+            
+            const barisData = semuaDataReview.map((item, index) => {
+                const reviewAsli = `"${(item.teks || '').replace(/"/g, '""')}"`;
+                const sumber = `"${(item.sumber || '').replace(/"/g, '""')}"`;
+                const hasilPre = `"${(item.hasil || '').replace(/"/g, '""')}"`;
+                const sentimen = `"${(item.sentimen || '').replace(/"/g, '""')}"`;
+                
+                return [index + 1, reviewAsli, sumber, hasilPre, sentimen].join(',');
+            });
+
+            // Tambahkan BOM agar Excel bisa baca UTF-8
+            const csvContent = '\uFEFF' + [headers.join(','), ...barisData].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Data_Analisis_Sentimen.csv");
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentRole = localStorage.getItem('role_akses');
+            const berandaLogoutItem = document.getElementById('menu-beranda-logout');
+            if (berandaLogoutItem) {
+                const aTag = berandaLogoutItem.querySelector('a');
+                if (currentRole !== 'pengunjung') {
+                    // is admin
+                    if (aTag) {
+                        aTag.innerText = 'Log Out';
+                        aTag.href = '#';
+                        aTag.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm("Yakin ingin log out?")) {
+                                localStorage.removeItem('role_akses');
+                                window.location.href = 'index.html';
+                            }
+                        };
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
