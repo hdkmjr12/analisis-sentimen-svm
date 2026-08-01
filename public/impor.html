@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impor Data - Analisis SVM</title>
+    <script>
+        // Cek siapa yang mencoba membuka halaman ini
+        const cekRole = localStorage.getItem('role_akses');
+        
+        // Jika statusnya pengunjung, atau jika belum login sama sekali (null)
+        if (cekRole === 'pengunjung' || cekRole === null) {
+            alert('Akses Ditolak! Anda harus login sebagai Admin untuk mengakses halaman ini.');
+            window.location.href = 'dashboard.html'; // Tendang kembali ke Dashboard
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/impor.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="logo-area"><img src="logo.png" alt="Logo"> Analisis SVM</div>
+            <ul class="menu-top">
+                <li class="menu-item"><a href="dashboard.html" class="menu-link">Dashboard</a></li>
+                <li class="menu-item"><a href="impor.html" class="menu-link active">Impor Data</a></li>
+                <li class="menu-item"><a href="preprocessing.html" class="menu-link">Preprocessing Data</a></li>
+                <li class="menu-item"><a href="analisis.html" class="menu-link">Analisis Sentimen</a></li>
+                <li class="menu-item"><a href="uji_sentimen.html" class="menu-link">Uji Sentimen</a></li>
+                <li class="menu-item"><a href="hasil.html" class="menu-link">Hasil Analisis</a></li>
+                <li class="menu-item menu-admin"><a href="cetak_laporan.html" class="menu-link">Cetak Laporan</a></li>
+            </ul>
+        </div>
+        <div>
+            <ul class="menu-bottom">
+                <li class="menu-item" id="menu-beranda-logout"><a href="index.html" class="menu-link">Kembali ke Beranda</a></li>
+                
+            </ul>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="user-profile">
+                <img src="profile.jpeg" alt="User Avatar">
+                <div class="user-info"><span class="user-name">Daud</span><span class="user-role">Admin</span></div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <h1 class="page-title">Impor Data</h1>
+
+            <div class="impor-layout">
+                
+                <div class="table-section fade-up-item delay-1">
+                    <div class="total-data-text">Total data : 0</div>
+                    <div class="data-table-container">
+                        
+                        <div class="table-scroll-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-no">No</th>
+                                        <th class="col-review" style="text-align: center;">Review</th>
+                                        <th class="col-sumber">Sumber</th>
+                                        <th class="col-komentar">Tanggal<br>Komentar</th>
+                                        <th class="col-date">Tanggal<br>Ditambahkan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-review">
+                                    <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-gray);">Belum ada data. Silakan upload CSV atau Tampilkan Review.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="action-section">
+                    <input type="file" id="input-csv" accept=".csv" style="display: none;" multiple>
+                    
+                    <button class="action-card btn-upload fade-up-item delay-2" onclick="document.getElementById('input-csv').value = null; document.getElementById('input-csv').click();">
+                        <span>Upload CSV</span><i class="fa-solid fa-cloud-arrow-up"></i>
+                    </button>
+
+                    <button class="action-card btn-save fade-up-item delay-3" id="btn-save" style="display: none;">
+                        <span>Simpan</span><i class="fa-solid fa-floppy-disk"></i>
+                    </button>
+
+                    <button class="action-card btn-show fade-up-item delay-4" id="btn-show">
+                        <span>Tampilkan<br>Semua Review</span>
+                        <i class="fa-solid fa-file-invoice"></i> 
+                    </button>
+
+                    <button class="action-card btn-delete-all fade-up-item delay-5" id="btn-delete-all" onclick="hapusSemuaData()" style="display: none;">
+                        <span>Hapus<br>Semua</span><i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="custom-modal">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon"><i class="fa-solid fa-circle-info"></i></div>
+            <h3 class="modal-title" id="modal-title">Pemberitahuan</h3>
+            <p class="modal-message" id="modal-message">Pesan teks akan muncul di sini.</p>
+            <div class="modal-buttons" id="modal-buttons">
+                </div>
+        </div>
+    </div>
+
+   <script>
+        // --- PEMICU ANIMASI FADE-UP ---
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(() => {
+                const animateItems = document.querySelectorAll('.fade-up-item');
+                animateItems.forEach(item => {
+                    item.classList.add('animate-now');
+                });
+            }, 100); // Trigger cepat setelah render DOM
+        });
+
+        let dataReview = []; 
+
+        // --- SISTEM MODAL CERDAS ---
+        function tutupModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+
+        function bukaModalInfo(pesan) {
+            document.getElementById('modal-title').innerText = 'Pemberitahuan';
+            document.getElementById('modal-icon').innerHTML = '<i class="fa-solid fa-circle-check" style="color: var(--primary-blue);"></i>';
+            document.getElementById('modal-message').innerText = pesan;
+            document.getElementById('modal-buttons').innerHTML = '<button class="modal-btn" onclick="tutupModal()">Mengerti</button>';
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function bukaModalError(pesan) {
+            document.getElementById('modal-title').innerText = 'Terjadi Kesalahan';
+            document.getElementById('modal-icon').innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: var(--btn-red-icon);"></i>';
+            document.getElementById('modal-message').innerText = pesan;
+            document.getElementById('modal-buttons').innerHTML = '<button class="modal-btn" onclick="tutupModal()">Tutup</button>';
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function bukaModalConfirm(pesan, callbackYa) {
+            document.getElementById('modal-title').innerText = 'Konfirmasi';
+            document.getElementById('modal-icon').innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: var(--btn-yellow-icon);"></i>';
+            document.getElementById('modal-message').innerText = pesan;
+            
+            document.getElementById('modal-buttons').innerHTML = `
+                <button class="modal-btn-cancel" onclick="tutupModal()">Batal</button>
+                <button class="modal-btn-danger" id="btn-modal-ya">Ya, Lanjutkan</button>
+            `;
+            
+            document.getElementById('custom-modal').classList.add('active');
+
+            document.getElementById('btn-modal-ya').onclick = function() {
+                tutupModal();
+                if(typeof callbackYa === 'function') callbackYa();
+            };
+        }
+
+
+        // Fungsi untuk membuat badge sumber
+        function buatBadgeSumber(sumber) {
+            if (!sumber || sumber === '-') return '<span class="badge-sumber badge-lainnya">-</span>';
+            const s = sumber.toLowerCase();
+            let badgeClass = 'badge-lainnya';
+            if (s.includes('instagram')) badgeClass = 'badge-instagram';
+            else if (s.includes('tiktok')) badgeClass = 'badge-tiktok';
+            else if (s.includes('youtube')) badgeClass = 'badge-youtube';
+            return `<span class="badge-sumber ${badgeClass}">${sumber}</span>`;
+        }
+
+        function renderTabel() {
+            const tbody = document.getElementById('tabel-review');
+            const teksTotal = document.querySelector('.total-data-text');
+            
+            tbody.innerHTML = ''; 
+
+            if (dataReview.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-gray);">Belum ada data. Silakan upload CSV atau Tampilkan Review.</td></tr>';
+                teksTotal.innerText = 'Total data : 0';
+                return;
+            }
+
+            dataReview.forEach((data, index) => {
+                const row = `
+                    <tr>
+                        <td class="col-no">${index + 1}.</td>
+                        <td class="col-review">${data.teks}</td>
+                        <td class="col-sumber">${buatBadgeSumber(data.sumber)}</td>
+                        <td class="col-komentar">${data.tanggal_komentar || '-'}</td>
+                        <td class="col-date">${data.tanggal}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            
+            teksTotal.innerText = `Total data : ${dataReview.length}`;
+        }
+
+        function aturTombolBersihkan(mode) {
+            const tombol = document.getElementById('btn-delete-all');
+            tombol.dataset.mode = mode;
+            tombol.innerHTML = mode === 'preview'
+                ? '<span>Batalkan<br>Preview</span><i class="fa-solid fa-xmark"></i>'
+                : '<span>Hapus<br>Semua</span><i class="fa-solid fa-trash-can"></i>';
+        }
+
+        // --- FUNGSI MENGHAPUS SEMUA DATA ---
+        function hapusSemuaData() {
+            if (dataReview.length === 0) return;
+
+            const adaDataDatabase = dataReview.some(item => item.id !== undefined && item.id !== null);
+
+            if (adaDataDatabase) {
+                bukaModalConfirm('PERINGATAN!\nIni akan menghapus SEMUA data review di dalam Database MySQL secara permanen. Lanjutkan?', function() {
+                    fetch('/cgi-bin/hapus.py', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        },
+                        body: JSON.stringify({ action: 'all' })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if(result.status === 'success') {
+                            dataReview = []; 
+                            renderTabel(); 
+                            document.getElementById('btn-delete-all').style.display = 'none';
+                            document.getElementById('btn-save').style.display = 'none';
+                            bukaModalInfo('Semua data berhasil dibersihkan dari database.');
+                        } else {
+                            bukaModalError('Gagal menghapus database: ' + result.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            } else {
+                bukaModalConfirm('Batalkan preview CSV yang belum disimpan?', function() {
+                    dataReview = []; 
+                    renderTabel(); 
+                    document.getElementById('btn-delete-all').style.display = 'none';
+                    document.getElementById('btn-save').style.display = 'none';
+                    document.getElementById('input-csv').value = null;
+                });
+            }
+        }
+
+        // Fungsi untuk mengekstrak nama sumber dari nama file CSV
+        function ekstrakSumber(namaFile) {
+            // Hapus ekstensi .csv
+            let nama = namaFile.replace(/\.csv$/i, '');
+            // Hapus prefix "hasil_scraping_" jika ada
+            nama = nama.replace(/^hasil_scraping_/i, '');
+            // Hapus angka di belakang (misal: instagram2 -> instagram)
+            nama = nama.replace(/\d+$/, '');
+            // Capitalize huruf pertama
+            if (nama.length > 0) {
+                nama = nama.charAt(0).toUpperCase() + nama.slice(1).toLowerCase();
+            }
+            return nama || '-';
+        }
+
+        // Parser CSV lokal: mendukung koma/titik koma, kutip ganda yang
+        // di-escape, serta baris baru di dalam isi komentar.
+        function parseCSV(text) {
+            const isi = text.replace(/^\uFEFF/, '');
+            const header = isi.split(/\r?\n/, 1)[0] || '';
+            const delimiter = header.includes(';') && !header.includes(',') ? ';' : ',';
+            const rows = [];
+            let row = [];
+            let field = '';
+            let dalamKutip = false;
+
+            for (let i = 0; i < isi.length; i++) {
+                const karakter = isi[i];
+
+                if (karakter === '"') {
+                    if (dalamKutip && isi[i + 1] === '"') {
+                        field += '"';
+                        i++;
+                    } else {
+                        dalamKutip = !dalamKutip;
+                    }
+                } else if (karakter === delimiter && !dalamKutip) {
+                    row.push(field);
+                    field = '';
+                } else if ((karakter === '\n' || karakter === '\r') && !dalamKutip) {
+                    if (karakter === '\r' && isi[i + 1] === '\n') i++;
+                    row.push(field);
+                    if (row.some(kolom => kolom.trim() !== '')) rows.push(row);
+                    row = [];
+                    field = '';
+                } else {
+                    field += karakter;
+                }
+            }
+
+            row.push(field);
+            if (row.some(kolom => kolom.trim() !== '')) rows.push(row);
+            return rows;
+        }
+
+        // 1. Membaca Banyak CSV Sekaligus dengan Parser Cerdas
+        document.getElementById('input-csv').addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            const today = new Date().toLocaleDateString('id-ID'); 
+            // FileReader berjalan asynchronous. Simpan hasil berdasarkan indeks
+            // file agar urutan impor tidak bergantung pada file yang selesai duluan.
+            let hasilPerFile = new Array(files.length); 
+            let fileSelesaiDibaca = 0;
+
+            for (let f = 0; f < files.length; f++) {
+                const reader = new FileReader();
+                const namaFileSaatIni = files[f].name;
+                const sumberData = ekstrakSumber(namaFileSaatIni);
+                const dataFileSaatIni = [];
+                
+                reader.onload = function(event) {
+                    const rows = parseCSV(event.target.result);
+                    
+                    // Mulai dari i = 1 untuk melewatkan Header (baris pertama CSV)
+                    for (let i = 1; i < rows.length; i++) {
+                        const kolomCSV = rows[i];
+                        let teksReview = kolomCSV[0] ? kolomCSV[0].trim() : "";
+                        let tanggalKomentar = kolomCSV[1] ? kolomCSV[1].trim() : "-";
+
+                        if (teksReview !== '') {
+                            dataFileSaatIni.push({ 
+                                id: null, 
+                                teks: teksReview, 
+                                sumber: sumberData,
+                                tanggal_komentar: tanggalKomentar,
+                                tanggal: today 
+                            }); 
+                        }
+                    }
+
+                    hasilPerFile[f] = dataFileSaatIni;
+                    fileSelesaiDibaca++;
+                    
+                    // Jika semua file CSV sudah selesai diproses oleh memori, tampilkan ke tabel HTML
+                    if (fileSelesaiDibaca === files.length) {
+                        dataReview = hasilPerFile.flat(); 
+                        renderTabel(); 
+                        const adaPreview = dataReview.length > 0;
+                        document.getElementById('btn-save').style.display = adaPreview ? 'flex' : 'none';
+                        document.getElementById('btn-delete-all').style.display = adaPreview ? 'flex' : 'none';
+                        aturTombolBersihkan('preview');
+                    }
+                };
+
+                reader.onerror = function() {
+                    hasilPerFile[f] = [];
+                    fileSelesaiDibaca++;
+                    if (fileSelesaiDibaca === files.length) {
+                        dataReview = hasilPerFile.flat();
+                        renderTabel();
+                        const adaPreview = dataReview.length > 0;
+                        document.getElementById('btn-save').style.display = adaPreview ? 'flex' : 'none';
+                        document.getElementById('btn-delete-all').style.display = adaPreview ? 'flex' : 'none';
+                        aturTombolBersihkan('preview');
+                    }
+                };
+                reader.readAsText(files[f]);
+            }
+        });
+
+        // 2. Menyimpan ke Database
+        document.getElementById('btn-save').addEventListener('click', function() {
+            const dataBaru = dataReview.filter(item => item.id === null);
+
+            if (dataBaru.length === 0) {
+                bukaModalInfo('Tidak ada data CSV baru yang perlu disimpan!');
+                return;
+            }
+
+            const dataKirim = dataBaru.map(item => ({ 
+                teks: item.teks, 
+                sumber: item.sumber || "-",
+                tanggal_komentar: item.tanggal_komentar || "-" 
+            }));
+
+            fetch('/cgi-bin/proses.py', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                },
+                body: JSON.stringify({
+                    data: dataKirim,
+                    id_admin: localStorage.getItem('id_admin')
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.status === 'success') {
+                    bukaModalInfo(result.message); 
+                    document.getElementById('btn-show').click(); 
+                } else {
+                    bukaModalError('Gagal: ' + result.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // 3. Menampilkan Semua Review dari Database
+        document.getElementById('btn-show').addEventListener('click', function() {
+            fetch('/cgi-bin/tampil.py', {
+                method: 'POST' 
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.status === 'success') {
+                    dataReview = result.data; 
+                    renderTabel();
+                    
+                    document.getElementById('btn-delete-all').style.display = 'flex';
+                    document.getElementById('btn-save').style.display = 'none';
+                    aturTombolBersihkan('database');
+                    
+                    if(dataReview.length === 0) {
+                        bukaModalInfo("Database MySQL Anda saat ini kosong.");
+                        document.getElementById('btn-delete-all').style.display = 'none';
+                    }
+                } else {
+                    bukaModalError('Gagal mengambil data: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                bukaModalError('Terjadi kesalahan koneksi saat memanggil data dari server.');
+            });
+        });
+
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentRole = localStorage.getItem('role_akses');
+            const berandaLogoutItem = document.getElementById('menu-beranda-logout');
+            if (berandaLogoutItem) {
+                const aTag = berandaLogoutItem.querySelector('a');
+                if (currentRole !== 'pengunjung') {
+                    // is admin
+                    if (aTag) {
+                        aTag.innerText = 'Log Out';
+                        aTag.href = '#';
+                        aTag.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm("Yakin ingin log out?")) {
+                                localStorage.removeItem('role_akses');
+                                localStorage.removeItem('auth_token');
+                                localStorage.removeItem('id_admin');
+                                window.location.href = 'index.html';
+                            }
+                        };
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

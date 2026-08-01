@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Analisis Sentimen LCGC</title>
+    <meta name="view-transition" content="same-origin">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+
+    <video autoplay loop muted playsinline id="bgVideo" class="video-bg">
+        <source src="mp_.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <img src="logo.png" alt="Logo" style="width: 30px; height: 30px;"> SVM Sentimen
+        </a>
+    </nav>
+
+    <div id="dynamic-content">
+        <section class="hero">
+            <div class="hero-text">
+                <h1 class="fade-up delay-2">Analisis Sentimen Review Konsumen Mobil LCGC</h1>
+
+                <p class="fade-up delay-3">Sebuah sistem cerdas berbasis <strong>Support Vector Machine (SVM)</strong>
+                    untuk memproses, mengklasifikasikan, dan menganalisis sentimen masyarakat terhadap mobil Low Cost
+                    Green Car secara otomatis dan akurat.</p>
+
+                <div class="button-group fade-up delay-4">
+                    <a href="#" onclick="masukSebagaiPengunjung()" class="btn btn-primary">
+                        <i class="fa-solid fa-chart-pie"></i> Lihat Analisis
+                    </a>
+
+                    <a href="#" onclick="bukaModalLogin(event)" class="btn btn-outline">
+                        <i class="fa-solid fa-shield-halved"></i> Login Sebagai Admin
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-box">
+            <button class="btn-close-modal" onclick="tutupModalLogin()"><i class="fa-solid fa-xmark"></i></button>
+            <i class="fa-solid fa-shield-halved login-icon"></i>
+            <h2 class="login-title">Autentikasi Admin</h2>
+            <p class="login-subtitle">Akses keamanan menuju sistem Analisis</p>
+            <div id="error-msg" class="error-message"><i class="fa-solid fa-triangle-exclamation"></i> <span>Username
+                    atau Password salah!</span></div>
+            <div id="success-msg" class="success-message"><i class="fa-solid fa-circle-check"></i> Login berhasil!
+                Mengalihkan...</div>
+            <form id="formLogin" onsubmit="prosesLoginDatabase(event)">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="username" placeholder="Masukkan username" required autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" id="btn-submit" class="btn-submit-login">Masuk ke Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- FUNGSI LOGIN & PENGUNJUNG ---
+        function masukSebagaiPengunjung() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('id_admin');
+            localStorage.setItem('role_akses', 'pengunjung');
+            window.location.href = 'dashboard.html';
+        }
+
+        function bukaModalLogin(event) {
+            event.preventDefault();
+            document.getElementById('loginModal').classList.add('active');
+            document.getElementById('username').focus();
+        }
+
+        function tutupModalLogin() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.getElementById('formLogin').reset();
+            document.getElementById('error-msg').style.display = 'none';
+            document.getElementById('success-msg').style.display = 'none';
+        }
+
+        function prosesLoginDatabase(event) {
+            event.preventDefault();
+
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const btnSubmit = document.getElementById('btn-submit');
+            const errorBox = document.getElementById('error-msg');
+            const successBox = document.getElementById('success-msg');
+
+            errorBox.style.display = 'none';
+            successBox.style.display = 'none';
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memeriksa...';
+
+            fetch('/cgi-bin/login.py', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        successBox.style.display = 'block';
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> Akses Diberikan';
+
+                        localStorage.setItem('role_akses', 'admin');
+                        localStorage.setItem('id_admin', result.id_admin);
+                        localStorage.setItem('auth_token', result.token);
+
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                    } else {
+                        errorBox.querySelector('span').innerText = result.message;
+                        errorBox.style.display = 'block';
+                        document.getElementById('password').value = '';
+
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = 'Masuk ke Dashboard';
+                    }
+                })
+                .catch(error => {
+                    errorBox.querySelector('span').innerText = 'Gagal terhubung ke server database.';
+                    errorBox.style.display = 'block';
+
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = 'Masuk ke Dashboard';
+                });
+        }
+    </script>
+</body>
+
+</html>

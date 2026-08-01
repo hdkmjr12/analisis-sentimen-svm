@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Sentimen - Analisis SVM</title>
+    <script>
+        // Cek siapa yang mencoba membuka halaman ini
+        const cekRole = localStorage.getItem('role_akses');
+        
+        // Jika statusnya pengunjung, atau jika belum login sama sekali (null)
+        if (cekRole === 'pengunjung' || cekRole === null) {
+            alert('Akses Ditolak! Anda harus login sebagai Admin untuk mengakses halaman ini.');
+            window.location.href = 'dashboard.html'; // Tendang kembali ke Dashboard
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/analisis.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="logo-area"><img src="logo.png" alt="Logo"> Analisis SVM</div>
+            <ul class="menu-top">
+                <li class="menu-item"><a href="dashboard.html" class="menu-link">Dashboard</a></li>
+                <li class="menu-item"><a href="impor.html" class="menu-link">Impor Data</a></li>
+                <li class="menu-item"><a href="preprocessing.html" class="menu-link">Preprocessing Data</a></li>
+                <li class="menu-item"><a href="analisis.html" class="menu-link active">Analisis Sentimen</a></li>
+                <li class="menu-item"><a href="uji_sentimen.html" class="menu-link">Uji Sentimen</a></li>
+                <li class="menu-item"><a href="hasil.html" class="menu-link">Hasil Analisis</a></li>
+                <li class="menu-item menu-admin"><a href="cetak_laporan.html" class="menu-link">Cetak Laporan</a></li>
+            </ul>
+        </div>
+        <div>
+            <ul class="menu-bottom">
+                <li class="menu-item" id="menu-beranda-logout"><a href="index.html" class="menu-link">Kembali ke Beranda</a></li>
+                
+            </ul>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="user-profile">
+                <img src="profile.jpeg" alt="User Avatar">
+                <div class="user-info">
+                    <span class="user-name">Daud</span>
+                    <span class="user-role">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            
+            <h1 class="page-title">Analisis Sentimen</h1>
+            
+            <div class="split-layout">
+                <div class="table-section fade-up-item delay-1">
+                    <div class="total-data-text">Total data : 0</div>
+                    <div class="card-table-container">
+                        
+                        <div class="table-scroll-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-no">No</th>
+                                        <th class="col-review">Review Asli</th>
+                                        <th class="col-sumber">Sumber</th>
+                                        <th class="col-tanggal">Tanggal</th>
+                                        <th class="col-hasil">Hasil Preprocessing</th>
+                                        <th class="col-sentimen">Sentimen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-analisis">
+                                    <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-gray);">Belum ada data. Silakan pilih menu di sebelah kanan.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="action-section">
+                    <button class="action-card btn-green fade-up-item delay-2" id="btn-analisis">
+                        <span>Mulai<br>Analisis</span>
+                        <i class="fa-solid fa-chart-column"></i>
+                    </button>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="custom-modal">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="fa-solid fa-circle-info"></i></div>
+            <h3 class="modal-title">Pemberitahuan</h3>
+            <p class="modal-message" id="modal-message">Pesan teks akan muncul di sini.</p>
+            <button class="modal-btn" onclick="tutupModal()">Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        // --- FITUR LOGOUT ADMIN ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const btnLogOut = document.getElementById('btn-login-logout');
+            if (btnLogOut) {
+                btnLogOut.onclick = function() {
+                    localStorage.removeItem('role_akses');
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('id_admin');
+                    window.location.href = 'index.html'; // Usir ke Landing Page setelah keluar
+                }
+            }
+
+            // --- PEMICU ANIMASI FADE-UP ---
+            setTimeout(() => {
+                const animateItems = document.querySelectorAll('.fade-up-item');
+                animateItems.forEach(item => {
+                    item.classList.add('animate-now');
+                });
+            }, 100); // Trigger cepat setelah render DOM
+        });
+
+        // --- FITUR TABEL DAN ANALISIS ---
+        let dataReview = []; 
+        let statusTampilan = ''; 
+
+        // Fungsi untuk membuat badge sumber
+        function buatBadgeSumber(sumber) {
+            if (!sumber || sumber === '-') return '<span class="badge-sumber badge-lainnya">-</span>';
+            const s = sumber.toLowerCase();
+            let badgeClass = 'badge-lainnya';
+            if (s.includes('instagram')) badgeClass = 'badge-instagram';
+            else if (s.includes('tiktok')) badgeClass = 'badge-tiktok';
+            else if (s.includes('youtube')) badgeClass = 'badge-youtube';
+            return `<span class="badge-sumber ${badgeClass}">${sumber}</span>`;
+        }
+
+        function bukaModal(pesan) {
+            document.getElementById('modal-message').innerText = pesan;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function tutupModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+
+        function renderTabel() {
+            const tbody = document.getElementById('tabel-analisis');
+            const teksTotal = document.querySelector('.total-data-text');
+            
+            tbody.innerHTML = ''; 
+
+            if (dataReview.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-gray);">Tidak ada data pada kategori ini.</td></tr>';
+                teksTotal.innerText = 'Total data : 0';
+                return;
+            }
+
+            dataReview.forEach((data, index) => {
+                const hasilTeks = data.hasil ? data.hasil : '<span style="color:#ccc; font-style:italic;">Kosong</span>';
+                
+                let labelSentimen = '<span class="text-netral">Belum dianalisis</span>';
+                if (data.sentimen) {
+                    if (data.sentimen.toUpperCase() === 'POSITIF') {
+                        labelSentimen = '<span class="text-positif">POSITIF</span>';
+                    } else if (data.sentimen.toUpperCase() === 'NEGATIF') {
+                        labelSentimen = '<span class="text-negatif">NEGATIF</span>';
+                    } else if (data.sentimen.toUpperCase() === 'NETRAL') {
+                        labelSentimen = '<span class="text-netral-hasil">NETRAL</span>'; 
+                    }
+                }
+
+                const row = `
+                    <tr>
+                        <td class="col-no">${index + 1}.</td>
+                        <td class="col-review">${data.teks}</td>
+                        <td class="col-sumber">${buatBadgeSumber(data.sumber)}</td>
+                        <td class="col-tanggal">${data.tanggal}</td>
+                        <td class="col-hasil">${hasilTeks}</td>
+                        <td class="col-sentimen">${labelSentimen}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            
+            teksTotal.innerText = `Total data : ${dataReview.length}`;
+        }
+
+        function tarikSemuaData() {
+            fetch('/cgi-bin/tampil.py', { method: 'POST', cache: 'no-store' })
+            .then(response => response.json())
+            .then(result => {
+                if(result.status === 'success') {
+                    
+                    let dataValid = result.data.filter(item => item.hasil && item.hasil.trim() !== '');
+                    dataReview = dataValid;
+                    
+                    renderTabel();
+                    
+                } else {
+                    bukaModal('Gagal mengambil data: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                bukaModal('Terjadi kesalahan koneksi saat memanggil data dari server.');
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            tarikSemuaData();
+        });
+
+        document.getElementById('btn-analisis').addEventListener('click', function() {
+            const dataBelumDianalisis = dataReview.filter(item => !item.sentimen || item.sentimen.trim() === '');
+            if (dataBelumDianalisis.length === 0) {
+                bukaModal("Semua data sudah dianalisis. Tidak ada data baru untuk diproses.");
+                return;
+            }
+
+            const btnProses = document.getElementById('btn-analisis');
+            const originalHTML = btnProses.innerHTML;
+            
+            btnProses.innerHTML = '<span>Sedang<br>Menganalisis...</span><i class="fa-solid fa-spinner fa-spin"></i>';
+            btnProses.style.opacity = '0.7';
+            btnProses.style.cursor = 'wait';
+            btnProses.disabled = true;
+
+            fetch('/cgi-bin/proses_svm.py', {
+                method: 'POST',
+                cache: 'no-store',
+                headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '') }
+            })
+            .then(response => response.json())
+            .then(result => {
+                btnProses.innerHTML = originalHTML;
+                btnProses.style.opacity = '1';
+                btnProses.style.cursor = 'pointer';
+                btnProses.disabled = false;
+
+                if(result.status === 'success') {
+                    bukaModal(result.message);
+                    tarikSemuaData(); 
+                } else {
+                    bukaModal('Gagal: ' + result.message);
+                }
+            })
+            .catch(error => {
+                btnProses.innerHTML = originalHTML;
+                btnProses.style.opacity = '1';
+                btnProses.style.cursor = 'pointer';
+                btnProses.disabled = false;
+                console.error('Error:', error);
+                bukaModal('Terjadi kesalahan server saat menganalisis data menggunakan SVM.');
+            });
+        });
+
+    </script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentRole = localStorage.getItem('role_akses');
+            const berandaLogoutItem = document.getElementById('menu-beranda-logout');
+            if (berandaLogoutItem) {
+                const aTag = berandaLogoutItem.querySelector('a');
+                if (currentRole !== 'pengunjung') {
+                    // is admin
+                    if (aTag) {
+                        aTag.innerText = 'Log Out';
+                        aTag.href = '#';
+                        aTag.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm("Yakin ingin log out?")) {
+                                localStorage.removeItem('role_akses');
+                                localStorage.removeItem('auth_token');
+                                localStorage.removeItem('id_admin');
+                                window.location.href = 'index.html';
+                            }
+                        };
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
