@@ -224,7 +224,10 @@
                 bukaModalConfirm('PERINGATAN!\nIni akan menghapus SEMUA data review di dalam Database MySQL secara permanen. Lanjutkan?', function() {
                     fetch('/cgi-bin/hapus.py', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                        },
                         body: JSON.stringify({ action: 'all' })
                     })
                     .then(response => response.json())
@@ -391,7 +394,10 @@
 
             fetch('/cgi-bin/proses.py', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('auth_token') || '')
+                },
                 body: JSON.stringify({
                     data: dataKirim,
                     id_admin: localStorage.getItem('id_admin')
@@ -455,6 +461,8 @@
                             e.preventDefault();
                             if (confirm("Yakin ingin log out?")) {
                                 localStorage.removeItem('role_akses');
+                                localStorage.removeItem('auth_token');
+                                localStorage.removeItem('id_admin');
                                 window.location.href = 'index.html';
                             }
                         };

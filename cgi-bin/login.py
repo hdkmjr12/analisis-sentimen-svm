@@ -3,6 +3,7 @@ import sys
 import json
 import mysql.connector
 from db_utils import DB_CONFIG
+from auth_utils import buat_token, verifikasi_password
 
 
 sys.stdin.reconfigure(encoding='utf-8')
@@ -35,16 +36,21 @@ try:
     tabel_ada = cursor.fetchone()
 
     
-    query = "SELECT * FROM admin_users WHERE username = %s AND password = %s"
-    cursor.execute(query, (user_input, pass_input))
+    query = "SELECT * FROM admin_users WHERE username = %s LIMIT 1"
+    cursor.execute(query, (user_input,))
     admin_valid = cursor.fetchone()
 
     cursor.close()
     koneksi.close()
 
     
-    if admin_valid:
-        kirim_json({"status": "success", "message": "Login berhasil!", "id_admin": admin_valid["id"]})
+    if admin_valid and verifikasi_password(pass_input, admin_valid["password"]):
+        kirim_json({
+            "status": "success",
+            "message": "Login berhasil!",
+            "id_admin": admin_valid["id"],
+            "token": buat_token(admin_valid["id"]),
+        })
     else:
         kirim_json({"status": "error", "message": "Username atau Password salah!"})
 

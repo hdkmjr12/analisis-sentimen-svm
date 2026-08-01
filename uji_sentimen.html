@@ -358,6 +358,8 @@
                             e.preventDefault();
                             if (confirm("Yakin ingin log out?")) {
                                 localStorage.removeItem('role_akses');
+                                localStorage.removeItem('auth_token');
+                                localStorage.removeItem('id_admin');
                                 window.location.href = 'index.html';
                             }
                         };

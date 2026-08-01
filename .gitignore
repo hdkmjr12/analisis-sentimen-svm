@@ -9,7 +9,12 @@ venv/
 .env.*
 !.env.example
 *.pem
+!certs/aiven-ca.pem
 *.key
+
+# Alat migrasi sementara
+tools/vendor/
+tools/wheels/
 
 # Runtime-generated files
 tmp/

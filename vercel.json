@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 300,
+      "includeFiles": "{cgi-bin/**,stemming_cache.json,certs/**}"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/health",
+      "destination": "/api/index?health=1"
+    },
+    {
+      "source": "/cgi-bin/:script.py",
+      "destination": "/api/index?script=:script"
+    }
+  ]
+}

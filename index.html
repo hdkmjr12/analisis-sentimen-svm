@@ -76,6 +76,8 @@
     <script>
         // --- FUNGSI LOGIN & PENGUNJUNG ---
         function masukSebagaiPengunjung() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('id_admin');
             localStorage.setItem('role_akses', 'pengunjung');
             window.location.href = 'dashboard.html';
         }
@@ -121,6 +123,7 @@
 
                         localStorage.setItem('role_akses', 'admin');
                         localStorage.setItem('id_admin', result.id_admin);
+                        localStorage.setItem('auth_token', result.token);
 
                         setTimeout(() => {
                             window.location.href = 'dashboard.html';

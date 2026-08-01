@@ -1,6 +1,7 @@
 import sys
 import json
 import os
+import tempfile
 
 from model_utils import batalkan_hasil_analisis
 from text_pipeline import buat_preprocessor, preprocess_teks, cek_kelayakan
@@ -42,11 +43,13 @@ try:
         platform_sebelum[sumber] = platform_sebelum.get(sumber, 0) + 1
 
     lokasi_project = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    lokasi_cache_stemming = os.path.join(lokasi_project, 'stemming_cache.json')
+    lokasi_cache_bawaan = os.path.join(lokasi_project, 'stemming_cache.json')
+    lokasi_cache_stemming = os.path.join(tempfile.gettempdir(), 'stemming_cache.json')
     cache_stemming = {}
-    if os.path.exists(lokasi_cache_stemming):
+    lokasi_cache_sumber = lokasi_cache_stemming if os.path.exists(lokasi_cache_stemming) else lokasi_cache_bawaan
+    if os.path.exists(lokasi_cache_sumber):
         try:
-            with open(lokasi_cache_stemming, 'r', encoding='utf-8') as file_cache:
+            with open(lokasi_cache_sumber, 'r', encoding='utf-8') as file_cache:
                 cache_stemming = json.load(file_cache)
         except (OSError, ValueError, TypeError):
             cache_stemming = {}

@@ -170,7 +170,7 @@ try:
         "kelompok_unik_per_kelas": kelompok_per_kelas,
         "metode_split": "StratifiedGroupKFold-5",
         "random_state": 42,
-    })
+    }, koneksi=koneksi)
 
     koneksi.commit()
     cursor.close()
