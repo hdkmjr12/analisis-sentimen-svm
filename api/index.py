@@ -52,6 +52,7 @@ def _run_cgi(script, method, body, query_string, content_type):
         "CONTENT_LENGTH": str(len(body)),
         "CONTENT_TYPE": content_type or "application/json",
         "PYTHONIOENCODING": "utf-8",
+        "PYTHONPATH": os.pathsep.join(path for path in sys.path if path),
         "QUERY_STRING": query_string,
         "REQUEST_METHOD": method,
         "SCRIPT_NAME": f"/cgi-bin/{script}.py",
